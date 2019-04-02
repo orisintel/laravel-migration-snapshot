@@ -32,7 +32,7 @@ class MigrateDumpTest extends TestCase
         $this->assertDirectoryExists($this->resultDir);
         $this->assertFileExists($this->resultFile);
         $result_sql = file_get_contents($this->resultFile);
-        $this->assertStringContainsString('CREATE TABLE `test_ms`', $result_sql);
-        $this->assertStringContainsString('INSERT INTO `migrations`', $result_sql);
+        $this->assertContains('CREATE TABLE `test_ms`', $result_sql);
+        $this->assertContains('INSERT INTO `migrations`', $result_sql);
     }
 }
