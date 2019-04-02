@@ -7,7 +7,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class MigrateLoadCommand extends \Illuminate\Console\Command
 {
     protected $signature = 'migrate:load
-        {--database= : The database connection to use}';
+        {--database= : The database connection to use}
+        {--no-drop : Do not drop tables before loading new structure}';
 
     protected $description = 'Load current database schema/structure from plain-text SQL file.';
 
@@ -33,12 +34,18 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         \DB::setDefaultConnection($database);
         $db_config = \DB::getConfig();
 
+        // CONSIDER: Moving option to `migrate:dump` instead.
+        $is_dropping = ! $this->option('no-drop');
+        if ($is_dropping) {
+            \Schema::dropAllTables();
+            \Schema::dropAllViews();
+            // TODO: Drop others too: sequences, etc.
+        }
+
         // Delegate to driver-specific restore/load CLI command.
         // ASSUMES: Restore utilities for DBMS installed and in path.
         // CONSIDER: Accepting options for underlying restore utilities from CLI.
         // CONSIDER: Option to restore to console Stdout instead.
-        // CONSIDER: Dropping whole DB, recreating; or at least dropping
-        // existing tables with `$db_config['prefix']`; to avoid residuals.
         switch($db_config['driver']) {
         case 'mysql':
             $exit_code = self::mysqlLoad($path, $db_config, $this->getOutput()->getVerbosity());
