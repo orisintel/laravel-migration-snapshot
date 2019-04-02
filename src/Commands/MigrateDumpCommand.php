@@ -56,7 +56,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         if (! file_exists($result_dir)) {
             mkdir($result_dir, 0755);
         }
-        $command_prefix = 'mysqldump --skip-add-drop-table --skip-comments --tz-utc'
+        $command_prefix = 'mysqldump --compact --tz-utc'
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
             . ' --user=' . escapeshellarg($db_config['username'])
