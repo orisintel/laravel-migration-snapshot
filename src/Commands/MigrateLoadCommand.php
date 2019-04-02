@@ -56,6 +56,9 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         case 'mysql':
             $exit_code = self::mysqlLoad($path, $db_config, $this->getOutput()->getVerbosity());
             break;
+        case 'pgsql':
+            $exit_code = self::pgsqlLoad($path, $db_config, $this->getOutput()->getVerbosity());
+            break;
         default:
             throw new \InvalidArgumentException(
                 'Unsupported DB driver ' . var_export($db_config['driver'], 1)
@@ -100,6 +103,45 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         case OutputInterface::VERBOSITY_DEBUG:
             $command .= ' -v -v -v';
             break;
+        }
+
+        passthru($command, $exit_code);
+
+        return $exit_code;
+    }
+
+    private static function pgsqlLoad(string $path, array $db_config, int $verbosity = null) : int
+    {
+        // CONSIDER: Supporting unix_socket.
+        // CONSIDER: Directly sending queries via Eloquent (requires parsing SQL
+        // or intermediate format).
+        // CONSIDER: Capturing Stderr and outputting with `$this->error()`.
+
+        // CONSIDER: Making input file an option which can override default.
+        $command = 'PGPASSWORD=' . escapeshellarg($db_config['password'])
+            . ' psql --file=' . escapeshellarg($path)
+            . ' --host=' . escapeshellarg($db_config['host'])
+            . ' --port=' . escapeshellarg($db_config['port'])
+            . ' --username=' . escapeshellarg($db_config['username'])
+            . ' ' . escapeshellarg($db_config['database']);
+        switch($verbosity) {
+            case OutputInterface::VERBOSITY_QUIET:
+                $command .= ' --quiet';
+                break;
+            /*TODO:
+            case OutputInterface::VERBOSITY_NORMAL:
+                // No op.
+                break;
+            case OutputInterface::VERBOSITY_VERBOSE:
+                $command .= ' -v';
+                break;
+            case OutputInterface::VERBOSITY_VERY_VERBOSE:
+                $command .= ' -v -v';
+                break;
+            case OutputInterface::VERBOSITY_DEBUG:
+                $command .= ' -v -v -v';
+                break;
+            */
         }
 
         passthru($command, $exit_code);
