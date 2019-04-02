@@ -8,7 +8,8 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
 {
     protected $signature = 'migrate:load
         {--database= : The database connection to use}
-        {--no-drop : Do not drop tables before loading new structure}';
+        {--force : Force the operation to run when in production}
+        {--no-drop : Do not drop tables before loading new structure, also MIGRATE_LOAD_NO_DROP=1}';
 
     protected $description = 'Load current database schema/structure from plain-text SQL file.';
 
@@ -17,7 +18,8 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         $exit_code = null;
 
         if (
-            'production' === app()->environment()
+            ! $this->option('force')
+            && 'production' === app()->environment()
             && ! $this->confirm('Are you sure you want to load DB structure?')
         ) {
             return;
@@ -35,10 +37,14 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         $db_config = \DB::getConfig();
 
         // CONSIDER: Moving option to `migrate:dump` instead.
-        $is_dropping = ! $this->option('no-drop');
+        $is_dropping = ! $this->option(
+            'no-drop',
+            // Prefixing with command name since `migrate` may implicitly call.
+            env('MIGRATE_LOAD_NO_DROP') ? true : false
+        );
         if ($is_dropping) {
-            \Schema::dropAllTables();
             \Schema::dropAllViews();
+            \Schema::dropAllTables();
             // TODO: Drop others too: sequences, etc.
         }
 
@@ -83,13 +89,13 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
             $command .= ' -q';
             break;
         case OutputInterface::VERBOSITY_NORMAL:
-            $command .= ' -v';
+            // No op.
             break;
         case OutputInterface::VERBOSITY_VERBOSE:
-            $command .= ' -v -v';
+            $command .= ' -v';
             break;
         case OutputInterface::VERBOSITY_VERY_VERBOSE:
-            // Fall through:
+            $command .= ' -v -v';
         case OutputInterface::VERBOSITY_DEBUG:
             $command .= ' -v -v -v';
             break;

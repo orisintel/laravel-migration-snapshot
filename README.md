@@ -16,6 +16,17 @@ run.
 
 ## Usage
 
+Implicitly migrate as load from an earlier, flattened copy:
+``` bash
+php artisan migrate
+```
+(When not migrating the production environment.)
+
+Migrate without loading from, or dumping to, flattened copy:
+``` bash
+MIGRATION_SNAPSHOT=0  php artisan migrate
+```
+
 Update the flattened SQL file:
 ``` bash
 php artisan migrate:dump

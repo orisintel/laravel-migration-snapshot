@@ -19,6 +19,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
     public function register()
     {
-        // No op.
+        $this->app->register(EventServiceProvider::class);
     }
 }
