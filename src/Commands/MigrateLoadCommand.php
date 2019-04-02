@@ -20,7 +20,7 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         if (
             ! $this->option('force')
             && 'production' === app()->environment()
-            && ! $this->confirm('Are you sure you want to load DB structure?')
+            && ! $this->confirm('Are you sure you want to load the DB schema from a file?')
         ) {
             return;
         }
@@ -45,7 +45,7 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         if ($is_dropping) {
             \Schema::dropAllViews();
             \Schema::dropAllTables();
-            // TODO: Drop others too: sequences, etc.
+            // TODO: Drop others too: sequences, types, etc.
         }
 
         // Delegate to driver-specific restore/load CLI command.
@@ -96,6 +96,7 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
             break;
         case OutputInterface::VERBOSITY_VERY_VERBOSE:
             $command .= ' -v -v';
+            break;
         case OutputInterface::VERBOSITY_DEBUG:
             $command .= ' -v -v -v';
             break;

@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 
 class MigrateStartingHandler
 {
-    // CONSIDER: Supporting `--env` and `--force`.
+    // CONSIDER: Supporting `--env`, `--force`, `--pretend`.
     private const DUMP_LOADABLE_OPTIONS = [
         '--ansi'           => 'bool',
         '--database'       => 'string',
@@ -35,9 +35,14 @@ class MigrateStartingHandler
             // CONSIDER: Making configurable blacklist of environments.
             && 'production' !== app()->environment()
         ) {
+            // Must pass along options or else it'll use wrong DB or have
+            // inconsistent output.
             $options = self::inputToArtisanOptions($event->input);
+
             // CONSIDER: Defaulting to --no-drop when not explicitly specified
             // with environment variable, for extra safety.
+            // CONSIDER: Explicitly passing output class (since underlying
+            // command classes may not always use `passthru`).
             \Artisan::call('migrate:load', $options);
         }
     }
