@@ -20,6 +20,9 @@ class MigrateDumpTest extends TestCase
         if (file_exists($this->resultFile)) {
             unlink($this->resultFile);
         }
+        if (file_exists($this->resultDir)) {
+            rmdir($this->resultDir);
+        }
     }
 
     public function test_handle()
