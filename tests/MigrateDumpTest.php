@@ -13,7 +13,7 @@ class MigrateDumpTest extends TestCase
     {
         parent::setUp();
 
-        $this->resultDir = realpath(__DIR__ . '/../vendor/orchestra/testbench-core/laravel/database/migrations/sql');
+        $this->resultDir = __DIR__ . '/../vendor/orchestra/testbench-core/laravel/database/migrations/sql';
         $this->resultFile = $this->resultDir . '/schema-and-migrations.sql';
         // Not leaving to tearDown since it can be useful to see result after
         // failure.
