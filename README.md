@@ -1,6 +1,7 @@
 # Laravel Migration Snapshot
 
-
+Simply and speed applying many migrations at once using a flattened dump of the
+database schema and migrations, similar in spirit to Rails' `schema.rb`.
 
 ## Installation
 
