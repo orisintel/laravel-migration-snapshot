@@ -52,6 +52,10 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         // CONSIDER: Ending with ".mysql" or "-mysql.sql" unless in
         // compatibility mode.
         $result_file = database_path() . self::SCHEMA_MIGRATIONS_PATH;
+        $result_dir = realpath(dirname($result_file));
+        if (! file_exists($result_dir)) {
+            mkdir($result_dir);
+        }
         $command_prefix = 'mysqldump --skip-add-drop-table --skip-comments --tz-utc'
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
