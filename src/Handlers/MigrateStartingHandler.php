@@ -89,7 +89,7 @@ class MigrateStartingHandler
                     $options[$option] = true;
                 }
             } else {
-                $input->getParameterOption($option);
+                $options[$option] = $input->getParameterOption($option);
             }
         }
 
