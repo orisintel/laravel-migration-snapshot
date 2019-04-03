@@ -123,25 +123,24 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
             . ' --username=' . escapeshellarg($db_config['username'])
-            . ' ' . escapeshellarg($db_config['database']);
+            . ' --dbname=' . escapeshellarg($db_config['database']);
         switch($verbosity) {
             case OutputInterface::VERBOSITY_QUIET:
                 $command .= ' --quiet';
                 break;
-            /*TODO:
             case OutputInterface::VERBOSITY_NORMAL:
-                // No op.
+                // By default psql outputs command results like "SET".
+                $command .= ' --output=/dev/null';
                 break;
             case OutputInterface::VERBOSITY_VERBOSE:
-                $command .= ' -v';
+                // No op.
                 break;
             case OutputInterface::VERBOSITY_VERY_VERBOSE:
-                $command .= ' -v -v';
+                $command .= ' --echo-errors';
                 break;
             case OutputInterface::VERBOSITY_DEBUG:
-                $command .= ' -v -v -v';
+                $command .= ' --echo-all';
                 break;
-            */
         }
 
         passthru($command, $exit_code);

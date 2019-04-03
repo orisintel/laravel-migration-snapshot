@@ -109,7 +109,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
             . ' --username=' . escapeshellarg($db_config['username'])
-            . ' --dbname=' . escapeshellarg($db_config['database']);
+            . ' ' . escapeshellarg($db_config['database']);
         passthru(
             $command_prefix
             . ' --file=' . escapeshellarg($result_file)
