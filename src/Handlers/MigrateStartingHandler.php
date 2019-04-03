@@ -106,7 +106,8 @@ class MigrateStartingHandler
      */
     private static function inputValidateWorkaround($input) : bool
     {
-        if (! $input instanceof ArgvInput) {
+        // Workaround unnecessary (or non-functional) when not exactly `ArgvInput`.
+        if (get_class($input) != ArgvInput::class) {
             return true;
         }
         // Since `$input->validate()` isn't working at this point check against
