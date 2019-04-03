@@ -27,7 +27,8 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             mkdir($schema_sql_directory, 0755);
         }
 
-        // Delegate to driver-specific dump CLI command.
+        // Delegate to driver-specific dump CLI command since their output is
+        // faster and more accurate than Laravel's schema DSL.
         // ASSUMES: Dump utilities for DBMS installed and in path.
         // CONSIDER: Accepting options for underlying dump utilities from CLI.
         // CONSIDER: Option to dump to console Stdout instead.
@@ -53,11 +54,11 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
     /**
      * @param array  $db_config   like ['host' => , 'port' => ].
-     * @param string $result_file like '.../schema-and-migrations.sql'
+     * @param string $schema_sql_path like '.../schema.sql'
      *
      * @return int containing exit code.
      */
-    private static function mysqlDump(array $db_config, string $result_file) : int
+    private static function mysqlDump(array $db_config, string $schema_sql_path) : int
     {
         // CONSIDER: Supporting unix_socket.
         // CONSIDER: Alternative tools like `xtrabackup` or even just querying
@@ -74,7 +75,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' ' . escapeshellarg($db_config['database']);
         passthru(
             $command_prefix
-            . ' --result-file=' . escapeshellarg($result_file)
+            . ' --result-file=' . escapeshellarg($schema_sql_path)
             . ' --no-data',
             $exit_code
         );
@@ -84,7 +85,8 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             // CONSIDER: How this could be done as consistent snapshot with
             // dump of structure, and avoid duplicate "SET" comments.
             passthru(
-                $command_prefix . ' migrations --no-create-info --skip-extended-insert >> ' . escapeshellarg($result_file),
+                $command_prefix . ' migrations --no-create-info --skip-extended-insert >> '
+                    . escapeshellarg($schema_sql_path),
                 $exit_code
             );
         }
@@ -97,7 +99,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
      *
      * @return int containing exit code.
      */
-    private static function pgsqlDump(array $db_config, string $result_file) : int
+    private static function pgsqlDump(array $db_config, string $schema_sql_path) : int
     {
         // CONSIDER: Supporting unix_socket.
         // CONSIDER: Instead querying pg catalog tables via Eloquent.
@@ -112,7 +114,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' ' . escapeshellarg($db_config['database']);
         passthru(
             $command_prefix
-            . ' --file=' . escapeshellarg($result_file)
+            . ' --file=' . escapeshellarg($schema_sql_path)
             . ' --schema-only',
             $exit_code
         );
@@ -122,7 +124,8 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             // CONSIDER: How this could be done as consistent snapshot with
             // dump of structure, and avoid duplicate "SET" comments.
             passthru(
-                $command_prefix . ' --table=migrations --data-only --inserts >> ' . escapeshellarg($result_file),
+                $command_prefix . ' --table=migrations --data-only --inserts >> '
+                    . escapeshellarg($schema_sql_path),
                 $exit_code
             );
         }

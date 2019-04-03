@@ -1,14 +1,14 @@
 # Laravel Migration Snapshot
 
-Simply and speed applying many migrations at once using a flattened dump of the
-database schema and migrations, similar in spirit to Rails' `schema.rb`.
+Simplify and accelerate applying many migrations at once using a flattened dump
+of the database schema and migrations, similar in spirit to Rails' `schema.rb`.
 
 ## Installation
 
 You can install the package via composer:
 
 ``` bash
-composer require orisintel/laravel-migration-snapshot
+composer require --dev orisintel/laravel-migration-snapshot
 ```
 
 The `mysqldump` and `mysql` commands must be in the path where Artisan will be
