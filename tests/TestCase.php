@@ -23,6 +23,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
             __DIR__ . '/../vendor/orchestra/testbench-core/laravel/database'
         ) . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX;
         $this->schemaSqlDirectory = dirname($this->schemaSqlPath);
+
         // Not leaving to tearDown since it can be useful to see result after
         // failure.
         foreach (glob($this->schemaSqlDirectory . '/*') as $sql_path) {
