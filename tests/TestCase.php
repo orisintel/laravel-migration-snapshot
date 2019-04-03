@@ -4,11 +4,13 @@
 namespace OrisIntel\MigrationSnapshot\Tests;
 
 
+use OrisIntel\MigrationSnapshot\Commands\MigrateDumpCommand;
+
 class TestCase extends \Orchestra\Testbench\TestCase
 {
     protected $dbDefault = 'mysql';
-    protected $resultDir;
-    protected $resultFile;
+    protected $schemaSqlDirectory;
+    protected $schemaSqlPath;
 
     protected function setUp(): void
     {
@@ -17,17 +19,17 @@ class TestCase extends \Orchestra\Testbench\TestCase
         // Won't trigger MigrateStartingHandler.
         $this->loadMigrationsFrom(__DIR__ . '/migrations/setup');
 
-        $this->resultDir = realpath(
-            __DIR__ . '/../vendor/orchestra/testbench-core/laravel/database/migrations'
-        ) . '/sql';
-        $this->resultFile = $this->resultDir . '/schema-and-migrations.sql';
+        $this->schemaSqlPath = realpath(
+            __DIR__ . '/../vendor/orchestra/testbench-core/laravel/database'
+        ) . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX;
+        $this->schemaSqlDirectory = dirname($this->schemaSqlPath);
         // Not leaving to tearDown since it can be useful to see result after
         // failure.
-        foreach (glob($this->resultDir . '/*') as $sql_path) {
+        foreach (glob($this->schemaSqlDirectory . '/*') as $sql_path) {
             unlink($sql_path);
         }
-        if (file_exists($this->resultDir)) {
-            rmdir($this->resultDir);
+        if (file_exists($this->schemaSqlDirectory)) {
+            rmdir($this->schemaSqlDirectory);
         }
     }
 

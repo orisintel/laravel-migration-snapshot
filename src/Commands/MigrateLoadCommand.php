@@ -25,7 +25,7 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
             return;
         }
 
-        $path = database_path() . MigrateDumpCommand::SCHEMA_MIGRATIONS_PATH;
+        $path = database_path() . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX;
         if (! file_exists($path)) {
             throw new \InvalidArgumentException(
                 'Schema-migrations path not found, run `migrate:dump` first.'

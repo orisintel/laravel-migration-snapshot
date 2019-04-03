@@ -13,9 +13,9 @@ class MigrateDumpTest extends TestCase
     {
         $result = \Artisan::call('migrate:dump');
         $this->assertEquals(0, $result);
-        $this->assertDirectoryExists($this->resultDir);
-        $this->assertFileExists($this->resultFile);
-        $result_sql = file_get_contents($this->resultFile);
+        $this->assertDirectoryExists($this->schemaSqlDirectory);
+        $this->assertFileExists($this->schemaSqlPath);
+        $result_sql = file_get_contents($this->schemaSqlPath);
         $this->assertRegExp('/CREATE TABLE (public\.)?test_ms /', $result_sql);
         $this->assertRegExp('/INSERT INTO (public\.)?migrations /', $result_sql);
     }

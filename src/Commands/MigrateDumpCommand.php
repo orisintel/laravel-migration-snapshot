@@ -4,7 +4,7 @@ namespace OrisIntel\MigrationSnapshot\Commands;
 
 final class MigrateDumpCommand extends \Illuminate\Console\Command
 {
-    public const SCHEMA_MIGRATIONS_PATH = '/migrations/sql/schema-and-migrations.sql';
+    public const SCHEMA_SQL_PATH_SUFFIX = '/migrations/sql/schema.sql';
 
     protected $signature = 'migrate:dump
         {--database= : The database connection to use}';
@@ -21,10 +21,10 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
         // CONSIDER: Ending with ".mysql" or "-mysql.sql" unless in
         // compatibility mode.
-        $result_file = database_path() . self::SCHEMA_MIGRATIONS_PATH;
-        $result_dir = dirname($result_file);
-        if (! file_exists($result_dir)) {
-            mkdir($result_dir, 0755);
+        $schema_sql_path = database_path() . self::SCHEMA_SQL_PATH_SUFFIX;
+        $schema_sql_directory = dirname($schema_sql_path);
+        if (! file_exists($schema_sql_directory)) {
+            mkdir($schema_sql_directory, 0755);
         }
 
         // Delegate to driver-specific dump CLI command.
@@ -35,10 +35,10 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         // CONSIDER: Separate classes.
         switch($db_config['driver']) {
         case 'mysql':
-            $exit_code = self::mysqlDump($db_config, $result_file);
+            $exit_code = self::mysqlDump($db_config, $schema_sql_path);
             break;
         case 'pgsql':
-            $exit_code = self::pgsqlDump($db_config, $result_file);
+            $exit_code = self::pgsqlDump($db_config, $schema_sql_path);
             break;
         default:
             throw new \InvalidArgumentException(

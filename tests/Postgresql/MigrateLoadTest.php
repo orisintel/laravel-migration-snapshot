@@ -21,6 +21,13 @@ class MigrateLoadTest extends TestCase
             '0000_00_00_000000_create_test_tables',
             \DB::table('migrations')->value('migration')
         );
+
+        $table_name = \DB::table('information_schema.tables')
+            ->where('table_schema', \DB::getDatabaseName())
+            ->whereNotIn('table_name', ['migrations'])
+            ->value('table_name');
+
+        //TODO:$this->assertEquals('test_ms', $table_name);
     }
 
     // TODO: Test no-drop and no-op-when-production.
