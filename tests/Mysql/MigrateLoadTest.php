@@ -7,8 +7,6 @@ use OrisIntel\MigrationSnapshot\Tests\TestCase;
 
 class MigrateLoadTest extends TestCase
 {
-    protected $dbDefault = 'pgsql';
-
     public function test_handle()
     {
         $result = \Artisan::call('migrate:dump');

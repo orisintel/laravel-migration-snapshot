@@ -24,6 +24,7 @@ class MigrateLoadTest extends TestCase
 
         $table_name = \DB::table('information_schema.tables')
             ->where('table_catalog', \DB::getDatabaseName())
+            ->where('table_schema', 'public')
             ->whereNotIn('table_name', ['migrations'])
             ->where('table_name', 'NOT LIKE', 'pg_%')
             ->value('table_name');
