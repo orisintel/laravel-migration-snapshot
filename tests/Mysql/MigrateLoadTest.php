@@ -32,5 +32,5 @@ class MigrateLoadTest extends TestCase
         $this->assertEquals('test_ms', $table_name);
     }
 
-    // TODO: Test no-drop and no-op-when-production.
+    // TODO: Test no-drop and prompt-when-production.
 }
