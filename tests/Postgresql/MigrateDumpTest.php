@@ -16,7 +16,7 @@ class MigrateDumpTest extends TestCase
         $this->assertDirectoryExists($this->resultDir);
         $this->assertFileExists($this->resultFile);
         $result_sql = file_get_contents($this->resultFile);
-        $this->assertContains('CREATE TABLE public.test_ms ', $result_sql);
-        $this->assertContains('INSERT INTO public.migrations ', $result_sql);
+        $this->assertRegExp('/CREATE TABLE (public\.)?test_ms /', $result_sql);
+        $this->assertRegExp('/INSERT INTO (public\.)?migrations /', $result_sql);
     }
 }
