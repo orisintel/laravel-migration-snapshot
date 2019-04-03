@@ -36,34 +36,30 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         \DB::setDefaultConnection($database);
         $db_config = \DB::getConfig();
 
+        if (! in_array($db_config['driver'], MigrateDumpCommand::SUPPORTED_DB_DRIVERS, true)) {
+            throw new \InvalidArgumentException(
+                'Unsupported DB driver ' . var_export($db_config['driver'], 1)
+            );
+        }
+
         // CONSIDER: Moving option to `migrate:dump` instead.
-        $is_dropping = ! $this->option(
-            'no-drop',
+        $is_dropping = ! ($this->option('no-drop')
+            ? true
             // Prefixing with command name since `migrate` may implicitly call.
-            env('MIGRATE_LOAD_NO_DROP') ? true : false
-        );
+            : env('MIGRATE_LOAD_NO_DROP') ? true : false);
         if ($is_dropping) {
             \Schema::dropAllViews();
             \Schema::dropAllTables();
             // TODO: Drop others too: sequences, types, etc.
+            $this->info('Dropped old tables and views');
         }
 
         // Delegate to driver-specific restore/load CLI command.
         // ASSUMES: Restore utilities for DBMS installed and in path.
         // CONSIDER: Accepting options for underlying restore utilities from CLI.
         // CONSIDER: Option to restore to console Stdout instead.
-        switch($db_config['driver']) {
-        case 'mysql':
-            $exit_code = self::mysqlLoad($path, $db_config, $this->getOutput()->getVerbosity());
-            break;
-        case 'pgsql':
-            $exit_code = self::pgsqlLoad($path, $db_config, $this->getOutput()->getVerbosity());
-            break;
-        default:
-            throw new \InvalidArgumentException(
-                'Unsupported DB driver ' . var_export($db_config['driver'], 1)
-            );
-        }
+        $method = $db_config['driver'] . 'Load';
+        $exit_code = self::{$method}($path, $db_config, $this->getOutput()->getVerbosity());
 
         if (0 !== $exit_code) {
             exit($exit_code);

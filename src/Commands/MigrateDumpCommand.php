@@ -5,6 +5,7 @@ namespace OrisIntel\MigrationSnapshot\Commands;
 final class MigrateDumpCommand extends \Illuminate\Console\Command
 {
     public const SCHEMA_SQL_PATH_SUFFIX = '/migrations/sql/schema.sql';
+    public const SUPPORTED_DB_DRIVERS = ['mysql', 'pgsql'];
 
     protected $signature = 'migrate:dump
         {--database= : The database connection to use}';
@@ -27,6 +28,12 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             mkdir($schema_sql_directory, 0755);
         }
 
+        if (! in_array($db_config['driver'], self::SUPPORTED_DB_DRIVERS, true)) {
+            throw new \InvalidArgumentException(
+                'Unsupported DB driver ' . var_export($db_config['driver'], 1)
+            );
+        }
+
         // Delegate to driver-specific dump CLI command since their output is
         // faster and more accurate than Laravel's schema DSL.
         // ASSUMES: Dump utilities for DBMS installed and in path.
@@ -34,20 +41,15 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         // CONSIDER: Option to dump to console Stdout instead.
         // CONSIDER: Option to dump for each DB connection instead of only one.
         // CONSIDER: Separate classes.
-        switch($db_config['driver']) {
-        case 'mysql':
-            $exit_code = self::mysqlDump($db_config, $schema_sql_path);
-            break;
-        case 'pgsql':
-            $exit_code = self::pgsqlDump($db_config, $schema_sql_path);
-            break;
-        default:
-            throw new \InvalidArgumentException(
-                'Unsupported DB driver ' . var_export($db_config['driver'], 1)
-            );
-        }
+        $method = $db_config['driver'] . 'Dump';
+        $exit_code = self::{$method}($db_config, $schema_sql_path);
 
         if (0 !== $exit_code) {
+            // Do not leave possibly incomplete file since loading it could
+            // leave an incomplete DB with no sign of a problem.
+            if (file_exists($schema_sql_path)) {
+                unlink($schema_sql_path);
+            }
             exit($exit_code);
         }
     }
@@ -67,7 +69,8 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
         // Not including connection name in file since typically only one DB.
         // Excluding any hash or date suffix since only current is relevant.
-        $command_prefix = 'mysqldump --compact --routines --tz-utc'
+        $command_prefix = 'mysqldump --routines --skip-add-drop-table'
+            . ' --skip-add-locks --skip-comments --skip-set-charset --tz-utc'
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
             . ' --user=' . escapeshellarg($db_config['username'])
