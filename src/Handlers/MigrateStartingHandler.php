@@ -7,7 +7,6 @@ use Illuminate\Console\Events\CommandStarting;
 use OrisIntel\MigrationSnapshot\Commands\MigrateDumpCommand;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 class MigrateStartingHandler
 {
@@ -75,7 +74,7 @@ class MigrateStartingHandler
             // with environment variable, for extra safety.
             // CONSIDER: Explicitly passing output class (since underlying
             // command classes may not always use `passthru`).
-            \Artisan::call('migrate:load', $options, new ConsoleOutput());
+            \Artisan::call('migrate:load', $options, $event->output);
         }
     }
 

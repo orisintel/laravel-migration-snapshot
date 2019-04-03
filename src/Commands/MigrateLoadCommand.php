@@ -62,8 +62,10 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         $exit_code = self::{$method}($path, $db_config, $this->getOutput()->getVerbosity());
 
         if (0 !== $exit_code) {
-            exit($exit_code);
+            exit($exit_code); // CONSIDER: Returning instead.
         }
+
+        $this->info('Loaded schema');
     }
 
     private static function mysqlLoad(string $path, array $db_config, int $verbosity = null) : int
@@ -122,7 +124,7 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
             . ' --dbname=' . escapeshellarg($db_config['database']);
         switch($verbosity) {
             case OutputInterface::VERBOSITY_QUIET:
-                $command .= ' --quiet';
+                $command .= ' --quiet --output=/dev/null';
                 break;
             case OutputInterface::VERBOSITY_NORMAL:
                 // By default psql outputs command results like "SET".

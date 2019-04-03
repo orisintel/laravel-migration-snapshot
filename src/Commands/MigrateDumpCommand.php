@@ -50,8 +50,10 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             if (file_exists($schema_sql_path)) {
                 unlink($schema_sql_path);
             }
-            exit($exit_code);
+            exit($exit_code); // CONSIDER: Returning instead.
         }
+
+        $this->info('Dumped schema');
     }
 
     /**

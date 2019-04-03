@@ -5,7 +5,6 @@ namespace OrisIntel\MigrationSnapshot\Handlers;
 
 use Illuminate\Console\Events\CommandFinished;
 use OrisIntel\MigrationSnapshot\Commands\MigrateDumpCommand;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
 class MigrateFinishedHandler
 {
@@ -26,7 +25,7 @@ class MigrateFinishedHandler
             }
 
             // CONSIDER: Only calling when at least one migration applied.
-            \Artisan::call('migrate:dump', $options, new ConsoleOutput());
+            \Artisan::call('migrate:dump', $options, $event->output);
         }
     }
 }

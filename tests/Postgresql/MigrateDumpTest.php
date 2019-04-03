@@ -11,6 +11,7 @@ class MigrateDumpTest extends TestCase
 
     public function test_handle()
     {
+        $this->createTestTablesWithoutMigrate();
         $result = \Artisan::call('migrate:dump');
         $this->assertEquals(0, $result);
         $this->assertDirectoryExists($this->schemaSqlDirectory);
