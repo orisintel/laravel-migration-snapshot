@@ -5,7 +5,7 @@ namespace OrisIntel\MigrationSnapshot\Commands;
 final class MigrateDumpCommand extends \Illuminate\Console\Command
 {
     public const SCHEMA_SQL_PATH_SUFFIX = '/migrations/sql/schema.sql';
-    public const SUPPORTED_DB_DRIVERS = ['mysql', 'pgsql'];
+    public const SUPPORTED_DB_DRIVERS = ['mysql', 'pgsql', 'sqlite'];
 
     protected $signature = 'migrate:dump
         {--database= : The database connection to use}';
@@ -78,6 +78,9 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' --user=' . escapeshellarg($db_config['username'])
             . ' --password=' . escapeshellarg($db_config['password'])
             . ' ' . escapeshellarg($db_config['database']);
+        // TODO: Suppress warning about insecure password.
+        // CONSIDER: Intercepting stdout and stderr and converting to colorized
+        // console output with `$this->info` and `->error`.
         passthru(
             $command_prefix
             . ' --result-file=' . escapeshellarg($schema_sql_path)
@@ -117,6 +120,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' --port=' . escapeshellarg($db_config['port'])
             . ' --username=' . escapeshellarg($db_config['username'])
             . ' ' . escapeshellarg($db_config['database']);
+        // TODO: Suppress warning about insecure password.
         passthru(
             $command_prefix
             . ' --file=' . escapeshellarg($schema_sql_path)
@@ -133,6 +137,54 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
                     . escapeshellarg($schema_sql_path),
                 $exit_code
             );
+        }
+
+        return $exit_code;
+    }
+
+    /**
+     * @param array  $db_config   like ['host' => , 'port' => ].
+     * @param string $schema_sql_path like '.../schema.sql'
+     *
+     * @return int containing exit code.
+     */
+    private static function sqliteDump(array $db_config, string $schema_sql_path) : int
+    {
+        // CONSIDER: Accepting command name as option or from config.
+        $command_prefix = 'sqlite3 ' . escapeshellarg($db_config['database']);
+
+        // Since Sqlite lacks Information Schema, and dumping everything may be
+        // too slow or memory intense, just query tables and dump them
+        // individually.
+        exec($command_prefix . ' .tables', $output, $exit_code);
+        if (0 !== $exit_code) {
+            return $exit_code;
+        }
+        $tables = preg_split('/\s+/', implode(' ', $output));
+
+        foreach ($tables as $table) {
+            // Migrations to be dumped with data afterward.
+            if ('migrations' === $table) {
+                continue;
+            }
+
+            passthru(
+                $command_prefix . ' ' . escapeshellarg(".schema $table")
+                . ' >> ' . escapeshellarg($schema_sql_path),
+                $exit_code
+            );
+            if (0 !== $exit_code) {
+                return $exit_code;
+            }
+        }
+
+        passthru(
+            $command_prefix . ' ' . escapeshellarg(".dump migrations")
+            . ' >> ' . escapeshellarg($schema_sql_path),
+            $exit_code
+        );
+        if (0 !== $exit_code) {
+            return $exit_code;
         }
 
         return $exit_code;
