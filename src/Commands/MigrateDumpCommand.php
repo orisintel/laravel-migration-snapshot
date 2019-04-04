@@ -71,7 +71,8 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
         // Not including connection name in file since typically only one DB.
         // Excluding any hash or date suffix since only current is relevant.
-        $command_prefix = 'mysqldump --routines --skip-add-drop-table'
+        $command_prefix = 'set -o pipefail &&'
+            . ' mysqldump --routines --skip-add-drop-table --fake'
             . ' --skip-add-locks --skip-comments --skip-set-charset --tz-utc'
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
@@ -80,8 +81,9 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' ' . escapeshellarg($db_config['database']);
         passthru(
             $command_prefix
-            . ' --result-file=' . escapeshellarg($schema_sql_path)
-            . ' --no-data',
+            . ' --no-data'
+            // CONSIDER: Avoiding Bash/shell and Sed by doing replacement in PHP.
+            . ' | sed -E "s/ AUTO_INCREMENT=[0-9]+ ?//g" > ' . escapeshellarg($schema_sql_path),
             $exit_code
         );
 
