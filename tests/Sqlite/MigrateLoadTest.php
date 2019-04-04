@@ -12,7 +12,6 @@ class MigrateLoadTest extends SqliteTestCase
         $this->createTestTablesWithoutMigrate();
         $result = \Artisan::call('migrate:dump');
         $this->assertEquals(0, $result);
-        \Schema::dropAllTables();
 
         $result = \Artisan::call('migrate:load');
         $this->assertEquals(0, $result);
