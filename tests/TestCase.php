@@ -16,7 +16,9 @@ class TestCase extends \Orchestra\Testbench\TestCase
     {
         parent::setUp();
 
-        $this->schemaSqlPath = database_path(MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX);
+        $this->schemaSqlPath = realpath(
+                __DIR__ . '/../vendor/orchestra/testbench-core/laravel/database'
+            ) . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX;
         $this->schemaSqlDirectory = dirname($this->schemaSqlPath);
 
         // Not leaving to tearDown since it can be useful to see result after

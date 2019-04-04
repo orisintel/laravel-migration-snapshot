@@ -12,6 +12,6 @@ abstract class SqliteTestCase extends TestCase
     public static function setUpBeforeClass()
     {
         // File must exist before connection will initialize, even if empty.
-        touch(database_path('database.sqlite'));
+        touch(__DIR__ . '/../../vendor/orchestra/testbench-core/laravel/database/database.sqlite');
     }
 }
