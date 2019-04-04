@@ -14,6 +14,6 @@ class MigrateDumpTest extends SqliteTestCase
         $this->assertFileExists($this->schemaSqlPath);
         $result_sql = file_get_contents($this->schemaSqlPath);
         $this->assertRegExp('/CREATE TABLE( IF NOT EXISTS)? "test_ms" /', $result_sql);
-        $this->assertContains('INSERT INTO migrations ', $result_sql);
+        $this->assertRegExp('/INSERT INTO "?migrations"? /', $result_sql);
     }
 }
