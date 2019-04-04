@@ -72,7 +72,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         // Not including connection name in file since typically only one DB.
         // Excluding any hash or date suffix since only current is relevant.
         $command_prefix = 'set -o pipefail &&'
-            . ' mysqldump --routines --skip-add-drop-table --fake'
+            . ' mysqldump --routines --skip-add-drop-table'
             . ' --skip-add-locks --skip-comments --skip-set-charset --tz-utc'
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
