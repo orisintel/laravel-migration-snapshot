@@ -7,6 +7,8 @@
 Simplify and accelerate applying many migrations at once using a flattened dump
 of the database schema and migrations, similar in spirit to Rails' `schema.rb`.
 
+Works with the `mysql` and `pgsql` database drivers.
+
 ## Installation
 
 You can install the package via composer:
@@ -15,8 +17,8 @@ You can install the package via composer:
 composer require --dev orisintel/laravel-migration-snapshot
 ```
 
-The `mysqldump` and `mysql` commands must be in the path where Artisan will be
-run.
+Database command-line utilities (such as `mysqldump` and `mysql`) must be in the
+path where Artisan will be run.
 
 ## Usage
 
