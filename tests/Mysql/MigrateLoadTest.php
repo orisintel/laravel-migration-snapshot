@@ -24,6 +24,8 @@ class MigrateLoadTest extends TestCase
             \DB::table('migrations')->value('migration')
         );
 
+        $this->assertEquals(0, \DB::table('test_ms')->count());
+
         $table_name = \DB::table('information_schema.tables')
             ->where('table_schema', \DB::getDatabaseName())
             ->whereNotIn('table_name', ['migrations'])
