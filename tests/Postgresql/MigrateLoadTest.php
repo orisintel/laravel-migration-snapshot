@@ -25,6 +25,8 @@ class MigrateLoadTest extends TestCase
             \DB::table('migrations')->value('migration')
         );
 
+        $this->assertEquals(0, \DB::table('test_ms')->count());
+
         $table_name = \DB::table('information_schema.tables')
             ->where('table_catalog', \DB::getDatabaseName())
             ->where('table_schema', 'public')
