@@ -84,6 +84,10 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' --no-data',
             $exit_code
         );
+        if (0 !== $exit_code) {
+            return $exit_code;
+        }
+
         $schema_sql = file_get_contents($schema_sql_path);
         if (false === $schema_sql) {
             return 1;
@@ -94,15 +98,13 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         }
 
         // Include migration rows to avoid unnecessary reruns conflicting.
-        if (0 === $exit_code) {
-            // CONSIDER: How this could be done as consistent snapshot with
-            // dump of structure, and avoid duplicate "SET" comments.
-            passthru(
-                $command_prefix . ' migrations --no-create-info --skip-extended-insert >> '
-                    . escapeshellarg($schema_sql_path),
-                $exit_code
-            );
-        }
+        // CONSIDER: How this could be done as consistent snapshot with
+        // dump of structure, and avoid duplicate "SET" comments.
+        passthru(
+            $command_prefix . ' migrations --no-create-info --skip-extended-insert >> '
+                . escapeshellarg($schema_sql_path),
+            $exit_code
+        );
 
         return $exit_code;
     }
@@ -131,17 +133,18 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' --schema-only',
             $exit_code
         );
+        if (0 !== $exit_code) {
+            return $exit_code;
+        }
 
         // Include migration rows to avoid unnecessary reruns conflicting.
-        if (0 === $exit_code) {
-            // CONSIDER: How this could be done as consistent snapshot with
-            // dump of structure, and avoid duplicate "SET" comments.
-            passthru(
-                $command_prefix . ' --table=migrations --data-only --inserts >> '
-                    . escapeshellarg($schema_sql_path),
-                $exit_code
-            );
-        }
+        // CONSIDER: How this could be done as consistent snapshot with
+        // dump of structure, and avoid duplicate "SET" comments.
+        passthru(
+            $command_prefix . ' --table=migrations --data-only --inserts >> '
+                . escapeshellarg($schema_sql_path),
+            $exit_code
+        );
 
         return $exit_code;
     }
