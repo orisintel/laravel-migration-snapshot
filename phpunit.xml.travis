@@ -28,7 +28,6 @@
     </logging>
 
     <php>
-        <env name="DB_DATABASE" value="test_ms"/>
         <env name="DB_USERNAME" value="root"/>
     </php>
 </phpunit>
