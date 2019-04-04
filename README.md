@@ -7,7 +7,7 @@
 Simplify and accelerate applying many migrations at once using a flattened dump
 of the database schema and migrations, similar in spirit to Rails' `schema.rb`.
 
-Works with the `mysql` and `pgsql` database drivers.
+Works with the `mysql`, `pgsql`, and `sqlite` database drivers.
 
 ## Installation
 
