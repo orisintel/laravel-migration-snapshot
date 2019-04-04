@@ -45,6 +45,12 @@ class TestCase extends \Orchestra\Testbench\TestCase
     {
         // Executing without `loadMigrationsFrom` and without `Artisan::call` to
         // avoid unnecessary runs through migration hooks.
+
+        if ('sqlite' === $this->dbDefault) {
+            // Workaround Travis CI quirk with some Sqlite connections.
+            config('database.connections.sqlite.database', database_path('database.sqlite'));
+        }
+
         require_once(__DIR__ . '/migrations/setup/0000_00_00_000000_create_test_tables.php');
         \Schema::dropAllTables();
         \Schema::dropAllViews();
