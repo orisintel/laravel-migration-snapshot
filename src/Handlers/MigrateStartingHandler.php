@@ -47,6 +47,9 @@ class MigrateStartingHandler
 
     public function handle(CommandStarting $event)
     {
+        // CONSIDER: Never implicitly loading on `migrate` to simplify code
+        // (dropping this whole class) and to avoid confusion.
+
         if (
             'migrate' === $event->command
             // Avoid knowingly starting migrate which will fail.
@@ -60,13 +63,34 @@ class MigrateStartingHandler
             // No point in implicitly loading when it's not present.
             && file_exists(database_path() . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX)
         ) {
-            // Must pass along options or else it'll use wrong DB or have
+            // Must pass along options or it may use wrong DB or have
             // inconsistent output.
             $options = self::inputToArtisanOptions($event->input);
             $database = $options['--database'] ?? env('DB_CONNECTION');
             $db_driver = \DB::connection($database)->getDriverName();
             if (! in_array($db_driver, MigrateDumpCommand::SUPPORTED_DB_DRIVERS, true)) {
                 // CONSIDER: Logging or emitting console warning.
+                return;
+            }
+
+            // Only implicitly load when DB has *not* migrated any since load
+            // would wipe existing data.
+            $has_migrated_any = false;
+            // Try-catch instead of information_schema since not all have one.
+            try {
+                $has_migrated_any = ! is_null(
+                    \DB::connection($database)->table('migrations')->value('id')
+                );
+            } catch (\PDOException $e) {
+                // No op. when table does not exist.
+                if (
+                    ! in_array($e->getCode(), ['42P01', '42S02'], true)
+                    && ! preg_match("/\bdoes ?n[o']t exist\b/iu", $e->getMessage())
+                ) {
+                    throw $e;
+                }
+            }
+            if ($has_migrated_any) {
                 return;
             }
 
