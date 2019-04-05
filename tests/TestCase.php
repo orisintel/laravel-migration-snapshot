@@ -49,6 +49,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
         \Schema::dropAllTables();
         \Schema::dropAllViews();
         \Schema::create('migrations', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->increments('id');
             $table->string('migration', 255);
             $table->integer('batch');
         });
