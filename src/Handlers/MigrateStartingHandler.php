@@ -66,8 +66,8 @@ class MigrateStartingHandler
             // Must pass along options or it may use wrong DB or have
             // inconsistent output.
             $options = self::inputToArtisanOptions($event->input);
-            $database = $options['--database'] ?? env('DB_CONNECTION');
-            $db_driver = \DB::connection($database)->getDriverName();
+            $database = $options['--database'] ?? \DB::getConfig('name');
+            $db_driver = \DB::getDriverName();
             if (! in_array($db_driver, MigrateDumpCommand::SUPPORTED_DB_DRIVERS, true)) {
                 // CONSIDER: Logging or emitting console warning.
                 return;
@@ -79,13 +79,13 @@ class MigrateStartingHandler
             // Try-catch instead of information_schema since not all have one.
             try {
                 $has_migrated_any = ! is_null(
-                    \DB::connection($database)->table('migrations')->value('id')
+                    \DB::table('migrations')->value('id')
                 );
             } catch (\PDOException $e) {
                 // No op. when table does not exist.
                 if (
                     ! in_array($e->getCode(), ['42P01', '42S02'], true)
-                    && ! preg_match("/\bdoes ?n[o']t exist\b/iu", $e->getMessage())
+                    && ! preg_match("/\b(does ?n[o']t exist|no such table)\b/iu", $e->getMessage())
                 ) {
                     throw $e;
                 }
@@ -112,7 +112,7 @@ class MigrateStartingHandler
                 if (false !== $input->getParameterOption($option)) {
                     $options[$option] = true;
                 }
-            } else {
+            } elseif (false !== $input->getParameterOption($option)) {
                 $options[$option] = $input->getParameterOption($option);
             }
         }
