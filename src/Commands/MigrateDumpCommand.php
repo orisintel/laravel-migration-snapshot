@@ -174,28 +174,17 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         $tables = preg_split('/\s+/', implode(' ', $output));
 
         foreach ($tables as $table) {
-            // Migrations to be dumped with data afterward.
-            if ('migrations' === $table) {
-                continue;
-            }
+            // Only migrations should dump data with schema.
+            $sql_command = 'migrations' === $table ? '.dump' : '.schema';
 
             passthru(
-                $command_prefix . ' ' . escapeshellarg(".schema $table")
+                $command_prefix . ' ' . escapeshellarg("$sql_command $table")
                 . ' >> ' . escapeshellarg($schema_sql_path),
                 $exit_code
             );
             if (0 !== $exit_code) {
                 return $exit_code;
             }
-        }
-
-        passthru(
-            $command_prefix . ' ' . escapeshellarg(".dump migrations")
-            . ' >> ' . escapeshellarg($schema_sql_path),
-            $exit_code
-        );
-        if (0 !== $exit_code) {
-            return $exit_code;
         }
 
         return $exit_code;
