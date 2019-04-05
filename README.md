@@ -26,7 +26,7 @@ Implicitly migrate as load from an earlier, flattened copy:
 ``` bash
 php artisan migrate
 ```
-(When not migrating the production environment.)
+(When `migrations` table is empty and not migrating the production environment.)
 
 Migrate without loading from, or dumping to, flattened copy:
 ``` bash
