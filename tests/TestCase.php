@@ -45,6 +45,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
     {
         // Executing without `loadMigrationsFrom` and without `Artisan::call` to
         // avoid unnecessary runs through migration hooks.
+
         require_once(__DIR__ . '/migrations/setup/0000_00_00_000000_create_test_tables.php');
         \Schema::dropAllTables();
         \Schema::dropAllViews();

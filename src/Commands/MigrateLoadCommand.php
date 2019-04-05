@@ -145,4 +145,17 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
 
         return $exit_code;
     }
+
+    private static function sqliteLoad(string $path, array $db_config, int $verbosity = null) : int
+    {
+        // CONSIDER: Directly sending queries via Eloquent (requires parsing SQL
+        // or intermediate format).
+        // CONSIDER: Capturing Stderr and outputting with `$this->error()`.
+
+        $command = 'sqlite3 ' . escapeshellarg($db_config['database']) . ' ' . escapeshellarg(".read $path");
+
+        passthru($command, $exit_code);
+
+        return $exit_code;
+    }
 }
