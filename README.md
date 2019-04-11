@@ -49,11 +49,11 @@ php artisan migrate:load
 composer test
 ```
 
-### Contributing
+## Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-### Security
+## Security
 
 If you discover any security related issues, please email
 opensource@orisintel.com instead of using the issue tracker.
