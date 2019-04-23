@@ -95,7 +95,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         if (false === $schema_sql) {
             return 1;
         }
-        $schema_sql = preg_replace('/(\b)AUTO_INCREMENT=[0-9]+/iu', '\1', $schema_sql);
+        $schema_sql = preg_replace('/\s+AUTO_INCREMENT=[0-9]+/iu', '', $schema_sql);
         if (false === file_put_contents($schema_sql_path, $schema_sql)) {
             return 1;
         }
