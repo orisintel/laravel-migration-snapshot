@@ -56,14 +56,27 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         $this->info('Dumped schema');
     }
 
-    private static function reorderMigrationRows(array &$output)
+    private static function reorderMigrationRows(array $output) : array
     {
         if (config('migration-snapshot.reorder')) {
-            sort($output);
-            foreach ($output as &$line) {
-                $line = preg_replace('/,\s*[0-9]+\s*\)\s*;\s*$/iu', ',0);', $line);
+            $reordered = [];
+            $new_id = 1;
+            foreach ($output as $line) {
+                $occurrences = preg_match(
+                    '/^(.*?VALUES\s*)\([0-9]+,(.*?),\s*[0-9]+\s*\)\s*;\s*$/iu',
+                    $line,
+                    $m
+                );
+                if (1 !== $occurrences) {
+                    throw new \UnexpectedValueException('Only insert rows supported');
+                }
+                $reordered[$m[2]] = "$m[1]($new_id,$m[2],0);";
+                $new_id += 1;
             }
+            return $reordered;
         }
+
+        return $output;
     }
 
     /**
@@ -120,7 +133,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             return $exit_code;
         }
 
-        self::reorderMigrationRows($output);
+        $output = self::reorderMigrationRows($output);
 
         file_put_contents(
             $schema_sql_path,
@@ -169,7 +182,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             return $exit_code;
         }
 
-        self::reorderMigrationRows($output);
+        $output = self::reorderMigrationRows($output);
 
         file_put_contents(
             $schema_sql_path,
@@ -219,8 +232,8 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
             if ('migrations' === $table) {
                 $insert_rows = array_slice($output, 4, -1);
-                self::reorderMigrationRows($insert_rows);
-                array_splice($output, 4, -1, $insert_rows);
+                $sorted = self::reorderMigrationRows($insert_rows);
+                array_splice($output, 4, -1, $sorted);
             }
 
             file_put_contents(
