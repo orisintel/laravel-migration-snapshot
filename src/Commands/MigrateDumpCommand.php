@@ -56,11 +56,10 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         $this->info('Dumped schema');
     }
 
-    private static function reorderMigrationRows(array $output) : array
+    public static function reorderMigrationRows(array $output) : array
     {
         if (config('migration-snapshot.reorder')) {
             $reordered = [];
-            $new_id = 1;
             foreach ($output as $line) {
                 // Extract parts of "INSERT ... VALUES ([id],'[ver]',[batch])
                 // where version begins with "YYYY_MM_DD_HHMMSS".
@@ -76,9 +75,14 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
                 }
                 // Reassemble parts with new values and index by timestamp of
                 // version string to sort.
-                $reordered[$m[2]] = "$m[1]($new_id,'$m[2]$m[3],0);";
-                $new_id += 1;
+                $reordered[$m[2]] = "$m[1](/*NEWID*/,'$m[2]$m[3],0);";
             }
+            ksort($reordered);
+            $reordered = array_values($reordered);
+            foreach ($reordered as $index => &$line) {
+                $line = str_replace('/*NEWID*/', $index + 1, $line);
+            }
+
             return $reordered;
         }
 
