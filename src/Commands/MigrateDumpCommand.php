@@ -56,6 +56,35 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         $this->info('Dumped schema');
     }
 
+    private static function reorderMigrationRows(array $output) : array
+    {
+        if (config('migration-snapshot.reorder')) {
+            $reordered = [];
+            $new_id = 1;
+            foreach ($output as $line) {
+                // Extract parts of "INSERT ... VALUES ([id],'[ver]',[batch])
+                // where version begins with "YYYY_MM_DD_HHMMSS".
+                $occurrences = preg_match(
+                    "/^(.*?VALUES\s*)\([0-9]+,\s*'([0-9_]{17})(.*?),\s*[0-9]+\s*\)\s*;\s*$/iu",
+                    $line,
+                    $m
+                );
+                if (1 !== $occurrences) {
+                    throw new \UnexpectedValueException(
+                        'Only insert rows supported:' . PHP_EOL . var_export($line, 1)
+                    );
+                }
+                // Reassemble parts with new values and index by timestamp of
+                // version string to sort.
+                $reordered[$m[2]] = "$m[1]($new_id,'$m[2]$m[3],0);";
+                $new_id += 1;
+            }
+            return $reordered;
+        }
+
+        return $output;
+    }
+
     /**
      * @param array  $db_config   like ['host' => , 'port' => ].
      * @param string $schema_sql_path like '.../schema.sql'
@@ -101,12 +130,21 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         }
 
         // Include migration rows to avoid unnecessary reruns conflicting.
-        // CONSIDER: How this could be done as consistent snapshot with
-        // dump of structure, and avoid duplicate "SET" comments.
-        passthru(
-            $command_prefix . ' migrations --no-create-info --skip-extended-insert >> '
-                . escapeshellarg($schema_sql_path),
+        exec(
+            $command_prefix . ' migrations --no-create-info --skip-extended-insert --compact',
+            $output,
             $exit_code
+        );
+        if (0 !== $exit_code) {
+            return $exit_code;
+        }
+
+        $output = self::reorderMigrationRows($output);
+
+        file_put_contents(
+            $schema_sql_path,
+            implode(PHP_EOL, $output),
+            FILE_APPEND
         );
 
         return $exit_code;
@@ -130,7 +168,6 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             . ' --port=' . escapeshellarg($db_config['port'])
             . ' --username=' . escapeshellarg($db_config['username'])
             . ' ' . escapeshellarg($db_config['database']);
-        // TODO: Suppress warning about insecure password.
         passthru(
             $command_prefix
             . ' --file=' . escapeshellarg($schema_sql_path)
@@ -142,12 +179,21 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         }
 
         // Include migration rows to avoid unnecessary reruns conflicting.
-        // CONSIDER: How this could be done as consistent snapshot with
-        // dump of structure, and avoid duplicate "SET" comments.
-        passthru(
-            $command_prefix . ' --table=migrations --data-only --inserts >> '
-                . escapeshellarg($schema_sql_path),
+        exec(
+            $command_prefix . ' --table=migrations --data-only --inserts',
+            $output,
             $exit_code
+        );
+        if (0 !== $exit_code) {
+            return $exit_code;
+        }
+
+        $output = self::reorderMigrationRows($output);
+
+        file_put_contents(
+            $schema_sql_path,
+            implode(PHP_EOL, $output),
+            FILE_APPEND
         );
 
         return $exit_code;
@@ -167,24 +213,40 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         // Since Sqlite lacks Information Schema, and dumping everything may be
         // too slow or memory intense, just query tables and dump them
         // individually.
+        // CONSIDER: Using Laravel's `Schema` code instead.
         exec($command_prefix . ' .tables', $output, $exit_code);
         if (0 !== $exit_code) {
             return $exit_code;
         }
         $tables = preg_split('/\s+/', implode(' ', $output));
 
+        file_put_contents($schema_sql_path, '');
+
         foreach ($tables as $table) {
             // Only migrations should dump data with schema.
             $sql_command = 'migrations' === $table ? '.dump' : '.schema';
 
-            passthru(
-                $command_prefix . ' ' . escapeshellarg("$sql_command $table")
-                . ' >> ' . escapeshellarg($schema_sql_path),
+            $output = [];
+            exec(
+                $command_prefix . ' ' . escapeshellarg("$sql_command $table"),
+                $output,
                 $exit_code
             );
             if (0 !== $exit_code) {
                 return $exit_code;
             }
+
+            if ('migrations' === $table) {
+                $insert_rows = array_slice($output, 4, -1);
+                $sorted = self::reorderMigrationRows($insert_rows);
+                array_splice($output, 4, -1, $sorted);
+            }
+
+            file_put_contents(
+                $schema_sql_path,
+                implode(PHP_EOL, $output) . PHP_EOL,
+                FILE_APPEND
+            );
         }
 
         return $exit_code;

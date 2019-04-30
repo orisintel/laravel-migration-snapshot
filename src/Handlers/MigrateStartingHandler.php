@@ -58,8 +58,7 @@ class MigrateStartingHandler
             && env('MIGRATION_SNAPSHOT', true) // CONSIDER: Config option.
             // Never implicitly load fresh (from file) in production since it
             // would need to drop first, and that would be destructive.
-            // CONSIDER: Making configurable blacklist of environments.
-            && 'production' !== app()->environment()
+            && in_array(app()->environment(), explode(',', config('migration-snapshot.environments')), true)
             // No point in implicitly loading when it's not present.
             && file_exists(database_path() . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX)
         ) {
