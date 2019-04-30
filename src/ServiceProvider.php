@@ -26,7 +26,5 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/migration-snapshot.php', 'migration-snapshot');
 
         $this->app->register(EventServiceProvider::class);
-
-        parent::register();
     }
 }
