@@ -14,8 +14,7 @@ class MigrateFinishedHandler
             'migrate' === $event->command // CONSIDER: Also `migrate:fresh`.
             && ! $event->input->hasParameterOption(['--help', '--pretend', '-V', '--version'])
             && env('MIGRATION_SNAPSHOT', true)
-            // CONSIDER: Making configurable blacklist of environments.
-            && 'production' !== app()->environment()
+            && in_array(app()->environment(), explode(',', config('migration-snapshot.environments')), true)
         ) {
             $options = MigrateStartingHandler::inputToArtisanOptions($event->input);
             $database = $options['--database'] ?? env('DB_CONNECTION');
