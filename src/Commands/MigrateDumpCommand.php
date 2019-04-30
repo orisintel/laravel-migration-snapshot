@@ -63,14 +63,16 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             $new_id = 1;
             foreach ($output as $line) {
                 $occurrences = preg_match(
-                    '/^(.*?VALUES\s*)\([0-9]+,(.*?),\s*[0-9]+\s*\)\s*;\s*$/iu',
+                    "/^(.*?VALUES\s*)\([0-9]+,'([0-9_]{17})(.*?),\s*[0-9]+\s*\)\s*;\s*$/iu",
                     $line,
                     $m
                 );
                 if (1 !== $occurrences) {
-                    throw new \UnexpectedValueException('Only insert rows supported');
+                    throw new \UnexpectedValueException(
+                        'Only insert rows supported:' . PHP_EOL . var_export($line, 1)
+                    );
                 }
-                $reordered[$m[2]] = "$m[1]($new_id,$m[2],0);";
+                $reordered[$m[2]] = "$m[1]($new_id,'$m[2]$m[3],0);";
                 $new_id += 1;
             }
             return $reordered;
