@@ -28,6 +28,25 @@ class MigrateHookTest extends TestCase
         $this->assertContains('Dumped schema', $output_string);
     }
 
+    public function test_handle_dumpsOnRollback()
+    {
+        $this->createTestTablesWithoutMigrate();
+
+        $output = new BufferedOutput();
+        $result = \Artisan::call(
+            'migrate:rollback',
+            [
+                '--path' => realpath(__DIR__ . '/migrations/setup'),
+                '--realpath' => true,
+            ],
+            $output
+        );
+        $this->assertEquals(0, $result);
+
+        $output_string = $output->fetch();
+        $this->assertContains('Dumped schema', $output_string);
+    }
+
     public function test_handle_doesNotLoadWhenDbHasMigrated()
     {
         // Make the dump file.
