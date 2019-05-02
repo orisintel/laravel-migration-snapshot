@@ -19,7 +19,7 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
 
         if (
             ! $this->option('force')
-            && 'production' === app()->environment()
+            && app()->environment('production')
             && ! $this->confirm('Are you sure you want to load the DB schema from a file?')
         ) {
             return;
