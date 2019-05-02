@@ -20,13 +20,21 @@ composer require --dev orisintel/laravel-migration-snapshot
 Database command-line utilities (such as `mysqldump` and `mysql`) must be in the
 path where Artisan will be run.
 
+## Configuration
+
+1. `php artisan vendor:publish --provider="\OrisIntel\MigrationSnapshot\ServiceProvider"`
+2. Consider reordering dumped rows if checking `schema.sql` into source control
+   * Add `MIGRATION_SNAPSHOT_REORDER=1` to `.env`, or ...
+   * Change default of `'reorder'` in `config/migration-snapshot.php` to `true`
+
 ## Usage
 
 Implicitly migrate as load from an earlier, flattened copy:
 ``` bash
 php artisan migrate
 ```
-(When `migrations` table is empty and not migrating the production environment.)
+(When `migrations` table is empty and migrating a configured environment;
+defaults to 'development', 'local', and 'testing'.)
 
 Migrate without loading from, or dumping to, flattened copy:
 ``` bash
@@ -38,7 +46,7 @@ Update the flattened SQL file:
 php artisan migrate:dump
 ```
 
-Load from the flattened SQL file:
+Load from the flattened SQL file, **dropping** any existing tables and views:
 ``` bash
 php artisan migrate:load
 ```
