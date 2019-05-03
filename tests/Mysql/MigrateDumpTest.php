@@ -24,6 +24,8 @@ class MigrateDumpTest extends TestCase
         $this->assertContains('CREATE TABLE `test_ms`', $result_sql);
         $this->assertContains('INSERT INTO `migrations`', $result_sql);
         $this->assertNotContains(' AUTO_INCREMENT=', $result_sql);
+        $last_character = mb_substr($result_sql, -1);
+        $this->assertRegExp("/[\r\n]\z/mu", $last_character);
     }
 
     public function test_reorderMigrationRows()

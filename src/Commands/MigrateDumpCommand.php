@@ -145,9 +145,11 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
         $output = self::reorderMigrationRows($output);
 
+        // Append reordered rows, and include a line break to make SCM diffs
+        // easier to read.
         file_put_contents(
             $schema_sql_path,
-            implode(PHP_EOL, $output),
+            implode(PHP_EOL, $output) . PHP_EOL,
             FILE_APPEND
         );
 
@@ -196,7 +198,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
         file_put_contents(
             $schema_sql_path,
-            implode(PHP_EOL, $output),
+            implode(PHP_EOL, $output) . PHP_EOL,
             FILE_APPEND
         );
 
