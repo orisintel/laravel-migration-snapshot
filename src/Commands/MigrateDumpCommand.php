@@ -177,8 +177,15 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         );
 
         // Reorder constraints for consistency since dump put underscored first.
-        if (preg_match_all('/(?:^|,)\s*CONSTRAINT\s+.*?(?:,|\)\s*\))/imu', $trimmed, $m)) {
-            $constraints_original = implode(PHP_EOL, $m[0]);
+        $offset = 0;
+        // Sort each adjacent block of constraints.
+        while (preg_match('/((?:^|,)?\s*CONSTRAINT\s+.*?(?:,|\)\s*\)))+/imu', $trimmed, $m, PREG_OFFSET_CAPTURE, $offset)) {
+            // Bump offset to avoid unintentionally reprocessing already sorted.
+            $offset = $m[count($m) - 1][1] + strlen($m[count($m) - 1][0]);
+            $constraints_original = $m[0][0];
+            if (! preg_match_all('/(?:^|,)\s*CONSTRAINT\s+.*?(?:,|\)\s*\))/imu', $constraints_original, $m)) {
+                continue;
+            }
             $constraints_array = $m[0];
             foreach ($constraints_array as &$constraint) {
                 $constraint = trim($constraint, ",\r\n");
