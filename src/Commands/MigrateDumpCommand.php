@@ -144,16 +144,60 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         }
 
         $output = self::reorderMigrationRows($output);
+        $output_string = implode(PHP_EOL, $output) . PHP_EOL;
+        $output_string = self::trimUnderscoresFromForeign($output_string);
 
         // Append reordered rows, and include a line break to make SCM diffs
         // easier to read.
         file_put_contents(
             $schema_sql_path,
-            implode(PHP_EOL, $output) . PHP_EOL,
+            $output_string,
             FILE_APPEND
         );
 
         return $exit_code;
+    }
+
+    /**
+     * Trim underscores from FK constraint names to workaround PTOSC quirk.
+     *
+     * @param string $sql like "CONSTRAINT _my_fk FOREIGN KEY ..."
+     *
+     * @return string without leading underscores like "CONSTRAINT my_fk ...".
+     */
+    public static function trimUnderscoresFromForeign(string $sql) : string
+    {
+        if (! config('migration-snapshot.trim-underscores')) {
+            return $sql;
+        }
+
+        $trimmed = preg_replace(
+            '/(^|,)(\s*CONSTRAINT\s+[`"]?)_+(.*?[`"]?\s+FOREIGN\s+KEY\b.*)/imu',
+            '\1\2\3',
+            $sql
+        );
+
+        // Reorder constraints for consistency since dump put underscored first.
+        if (preg_match_all('/(?:^|,)\s*CONSTRAINT\s+.*?(?:,|\)\s*\))/imu', $trimmed, $m)) {
+            $constraints_original = implode(PHP_EOL, $m[0]);
+            $constraints_array = $m[0];
+            foreach ($constraints_array as &$constraint) {
+                $constraint = trim($constraint, ",\r\n");
+                // Trim extra parenthesis at the end of table definitions.
+                $constraint = preg_replace('/(\s*\))\s*\)\z/imu', '\1', $constraint, 1);
+            }
+            sort($constraints_array);
+            $separator = ',' . PHP_EOL;
+            // Comma or "\n)".
+            $terminator = preg_match('/(,|\s*\))\z/imu', $constraints_original, $m)
+                ? $m[1] : '';
+            $constraints_sorted = $separator
+                . implode($separator, $constraints_array)
+                . $terminator;
+            $trimmed = str_replace($constraints_original, $constraints_sorted, $trimmed);
+        }
+
+        return $trimmed;
     }
 
     /**

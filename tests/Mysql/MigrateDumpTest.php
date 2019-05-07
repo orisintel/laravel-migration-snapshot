@@ -11,6 +11,7 @@ class MigrateDumpTest extends TestCase
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('migration-snapshot.reorder', true);
+        $app['config']->set('migration-snapshot.trim-underscores', true);
     }
 
     public function test_handle()
@@ -26,6 +27,22 @@ class MigrateDumpTest extends TestCase
         $this->assertNotContains(' AUTO_INCREMENT=', $result_sql);
         $last_character = mb_substr($result_sql, -1);
         $this->assertRegExp("/[\r\n]\z/mu", $last_character);
+    }
+
+    public function test_trimUnderscoresFromForeign()
+    {
+        $sql = "KEY z_index,
+  CONSTRAINT _b_fk FOREIGN KEY('b') REFERENCES b ON('b'),
+  CONSTRAINT a_fk FOREIGN KEY('a') REFERENCES a ON('a')
+);";
+        $trimmed = MigrateDumpCommand::trimUnderscoresFromForeign($sql);
+        $this->assertEquals(
+            "KEY z_index,
+  CONSTRAINT a_fk FOREIGN KEY('a') REFERENCES a ON('a'),
+  CONSTRAINT b_fk FOREIGN KEY('b') REFERENCES b ON('b')
+);",
+            $trimmed
+        );
     }
 
     public function test_reorderMigrationRows()

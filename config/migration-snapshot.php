@@ -31,4 +31,18 @@ return [
     */
 
     'reorder' => env('MIGRATION_SNAPSHOT_REORDER', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Whether to trim underscores from foreign constraints for consistency.
+    |--------------------------------------------------------------------------
+    |
+    | Percona's Online Schema Change for Mysql may prepend foreign constraints
+    | with underscores. Since it may not be used in all environments some dumped
+    | snapshots may not match, adding unnecessary noise to source control.
+    | Enable this trimming to get more consistent snapshots when PTOSC may be
+    | used.
+    |
+    */
+    'trim-underscores' => env('MIGRATION_SNAPSHOT_TRIM_UNDERSCORES', false),
 ];
