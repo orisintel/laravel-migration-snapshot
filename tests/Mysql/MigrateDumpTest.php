@@ -32,14 +32,14 @@ class MigrateDumpTest extends TestCase
     public function test_trimUnderscoresFromForeign()
     {
         $sql = "KEY z_index,
-  CONSTRAINT _b_fk FOREIGN KEY('b') REFERENCES b ON('b'),
-  CONSTRAINT a_fk FOREIGN KEY('a') REFERENCES a ON('a')
+  CONSTRAINT `__b_fk` FOREIGN KEY (`b`) REFERENCES `b` ON(`b`),
+  CONSTRAINT `a_fk` FOREIGN KEY (`a`) REFERENCES `a` ON(`a`)
 );";
         $trimmed = MigrateDumpCommand::trimUnderscoresFromForeign($sql);
         $this->assertEquals(
             "KEY z_index,
-  CONSTRAINT a_fk FOREIGN KEY('a') REFERENCES a ON('a'),
-  CONSTRAINT b_fk FOREIGN KEY('b') REFERENCES b ON('b')
+  CONSTRAINT `a_fk` FOREIGN KEY (`a`) REFERENCES `a` ON(`a`),
+  CONSTRAINT `b_fk` FOREIGN KEY (`b`) REFERENCES `b` ON(`b`)
 );",
             $trimmed
         );

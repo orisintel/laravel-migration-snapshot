@@ -129,6 +129,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             return 1;
         }
         $schema_sql = preg_replace('/\s+AUTO_INCREMENT=[0-9]+/iu', '', $schema_sql);
+        $schema_sql = self::trimUnderscoresFromForeign($schema_sql);
         if (false === file_put_contents($schema_sql_path, $schema_sql)) {
             return 1;
         }
@@ -144,14 +145,12 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         }
 
         $output = self::reorderMigrationRows($output);
-        $output_string = implode(PHP_EOL, $output) . PHP_EOL;
-        $output_string = self::trimUnderscoresFromForeign($output_string);
 
         // Append reordered rows, and include a line break to make SCM diffs
         // easier to read.
         file_put_contents(
             $schema_sql_path,
-            $output_string,
+            implode(PHP_EOL, $output) . PHP_EOL,
             FILE_APPEND
         );
 
