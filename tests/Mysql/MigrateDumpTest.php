@@ -8,12 +8,6 @@ use OrisIntel\MigrationSnapshot\Tests\TestCase;
 
 class MigrateDumpTest extends TestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        $app['config']->set('migration-snapshot.reorder', true);
-        $app['config']->set('migration-snapshot.trim-underscores', true);
-    }
-
     public function test_handle()
     {
         $this->createTestTablesWithoutMigrate();
