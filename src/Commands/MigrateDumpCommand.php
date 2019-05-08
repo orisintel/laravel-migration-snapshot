@@ -236,13 +236,22 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
         // Include migration rows to avoid unnecessary reruns conflicting.
         exec(
-            $command_prefix . ' --table=migrations --data-only --inserts',
+            $command_prefix . ' --table=migrations --data-only --inserts --no-comments',
             $output,
             $exit_code
         );
         if (0 !== $exit_code) {
             return $exit_code;
         }
+
+        // Cut "SET" statements and workaround `--no-comments` not always working.
+        $output = array_filter(
+            $output,
+            function ($line) {
+                return 0 === preg_match('/^\s*(--|SELECT\s|SET\s)/iu', $line)
+                    && 0 < mb_strlen($line);
+            }
+        );
 
         $output = self::reorderMigrationRows($output);
 
