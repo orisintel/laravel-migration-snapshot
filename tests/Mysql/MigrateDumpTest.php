@@ -11,6 +11,7 @@ class MigrateDumpTest extends TestCase
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('migration-snapshot.reorder', true);
+        $app['config']->set('migration-snapshot.trim-underscores', true);
     }
 
     public function test_handle()
@@ -26,6 +27,30 @@ class MigrateDumpTest extends TestCase
         $this->assertNotContains(' AUTO_INCREMENT=', $result_sql);
         $last_character = mb_substr($result_sql, -1);
         $this->assertRegExp("/[\r\n]\z/mu", $last_character);
+    }
+
+    public function test_trimUnderscoresFromForeign()
+    {
+        $sql = "KEY z_index,
+  CONSTRAINT `__b_fk` FOREIGN KEY (`b`) REFERENCES `b` ON(`b`),
+  CONSTRAINT `a_fk` FOREIGN KEY (`a`) REFERENCES `a` ON(`a`)
+);
+...KEY z2_index,
+  CONSTRAINT `__d_fk` FOREIGN KEY (`d`) REFERENCES `d` ON(`d`),
+  CONSTRAINT `c_fk` FOREIGN KEY (`c`) REFERENCES `c` ON(`c`)
+);";
+        $trimmed = MigrateDumpCommand::trimUnderscoresFromForeign($sql);
+        $this->assertEquals(
+            "KEY z_index,
+  CONSTRAINT `a_fk` FOREIGN KEY (`a`) REFERENCES `a` ON(`a`),
+  CONSTRAINT `b_fk` FOREIGN KEY (`b`) REFERENCES `b` ON(`b`)
+);
+...KEY z2_index,
+  CONSTRAINT `c_fk` FOREIGN KEY (`c`) REFERENCES `c` ON(`c`),
+  CONSTRAINT `d_fk` FOREIGN KEY (`d`) REFERENCES `d` ON(`d`)
+);",
+            $trimmed
+        );
     }
 
     public function test_reorderMigrationRows()

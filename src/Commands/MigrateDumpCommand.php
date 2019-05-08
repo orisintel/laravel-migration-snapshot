@@ -129,6 +129,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
             return 1;
         }
         $schema_sql = preg_replace('/\s+AUTO_INCREMENT=[0-9]+/iu', '', $schema_sql);
+        $schema_sql = self::trimUnderscoresFromForeign($schema_sql);
         if (false === file_put_contents($schema_sql_path, $schema_sql)) {
             return 1;
         }
@@ -154,6 +155,55 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         );
 
         return $exit_code;
+    }
+
+    /**
+     * Trim underscores from FK constraint names to workaround PTOSC quirk.
+     *
+     * @param string $sql like "CONSTRAINT _my_fk FOREIGN KEY ..."
+     *
+     * @return string without leading underscores like "CONSTRAINT my_fk ...".
+     */
+    public static function trimUnderscoresFromForeign(string $sql) : string
+    {
+        if (! config('migration-snapshot.trim-underscores')) {
+            return $sql;
+        }
+
+        $trimmed = preg_replace(
+            '/(^|,)(\s*CONSTRAINT\s+[`"]?)_+(.*?[`"]?\s+FOREIGN\s+KEY\b.*)/imu',
+            '\1\2\3',
+            $sql
+        );
+
+        // Reorder constraints for consistency since dump put underscored first.
+        $offset = 0;
+        // Sort each adjacent block of constraints.
+        while (preg_match('/((?:^|,)?\s*CONSTRAINT\s+.*?(?:,|\)\s*\)))+/imu', $trimmed, $m, PREG_OFFSET_CAPTURE, $offset)) {
+            // Bump offset to avoid unintentionally reprocessing already sorted.
+            $offset = $m[count($m) - 1][1] + strlen($m[count($m) - 1][0]);
+            $constraints_original = $m[0][0];
+            if (! preg_match_all('/(?:^|,)\s*CONSTRAINT\s+.*?(?:,|\)\s*\))/imu', $constraints_original, $m)) {
+                continue;
+            }
+            $constraints_array = $m[0];
+            foreach ($constraints_array as &$constraint) {
+                $constraint = trim($constraint, ",\r\n");
+                // Trim extra parenthesis at the end of table definitions.
+                $constraint = preg_replace('/(\s*\))\s*\)\z/imu', '\1', $constraint, 1);
+            }
+            sort($constraints_array);
+            $separator = ',' . PHP_EOL;
+            // Comma or "\n)".
+            $terminator = preg_match('/(,|\s*\))\z/imu', $constraints_original, $m)
+                ? $m[1] : '';
+            $constraints_sorted = $separator
+                . implode($separator, $constraints_array)
+                . $terminator;
+            $trimmed = str_replace($constraints_original, $constraints_sorted, $trimmed);
+        }
+
+        return $trimmed;
     }
 
     /**
