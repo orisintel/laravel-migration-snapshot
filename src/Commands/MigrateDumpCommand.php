@@ -236,7 +236,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
 
         // Include migration rows to avoid unnecessary reruns conflicting.
         exec(
-            $command_prefix . ' --table=migrations --data-only --inserts --no-comments',
+            $command_prefix . ' --table=migrations --data-only --inserts',
             $output,
             $exit_code
         );
