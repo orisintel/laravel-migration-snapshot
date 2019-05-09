@@ -23,26 +23,25 @@ return [
     | the migration records for consistency so the output file can be managed
     | in source control.
     |
-    | If the order migrations are applied will produce significant differences,
-    | such as changing the behavior of the app, then this should be left
-    | disabled. In such cases `migrate:fresh --database=test` followed by
-    | `migrate` or `migrate:dump` can achieve similar consistency.
+    | If the order that closely versioned migrations are applied will produce
+    | significant differences, such as changing the behavior of the app, then
+    | disabling this may be preferred.
     |
     */
 
-    'reorder' => env('MIGRATION_SNAPSHOT_REORDER', false),
+    'reorder' => env('MIGRATION_SNAPSHOT_REORDER', true),
 
     /*
     |--------------------------------------------------------------------------
-    | Whether to trim underscores from foreign constraints for consistency.
+    | Whether to trim leading underscores from foreign constraints.
     |--------------------------------------------------------------------------
     |
     | Percona's Online Schema Change for Mysql may prepend foreign constraints
     | with underscores. Since it may not be used in all environments some dumped
     | snapshots may not match, adding unnecessary noise to source control.
-    | Enable this trimming to get more consistent snapshots when PTOSC may be
-    | used.
+    | Disable this trimming if leading underscores are significant for your use
+    | case.
     |
     */
-    'trim-underscores' => env('MIGRATION_SNAPSHOT_TRIM_UNDERSCORES', false),
+    'trim-underscores' => env('MIGRATION_SNAPSHOT_TRIM_UNDERSCORES', true),
 ];
