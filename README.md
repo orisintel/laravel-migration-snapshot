@@ -22,10 +22,10 @@ path where Artisan will be run.
 
 ## Configuration
 
-1. `php artisan vendor:publish --provider="\OrisIntel\MigrationSnapshot\ServiceProvider"`
-2. Consider reordering dumped rows if checking `schema.sql` into source control
-   * Add `MIGRATION_SNAPSHOT_REORDER=1` to `.env`, or ...
-   * Change default of `'reorder'` in `config/migration-snapshot.php` to `true`
+Put `migration-snapshot.php` into `config` with:
+``` bash
+php artisan vendor:publish --provider="\OrisIntel\MigrationSnapshot\ServiceProvider"
+```
 
 ## Usage
 
