@@ -228,7 +228,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         passthru(
             $command_prefix
             . ' --file=' . escapeshellarg($schema_sql_path)
-            . (config('migration-snapshot.data') ? :'' : ' --schema-only'),
+            . (config('migration-snapshot.data') ? '' : ' --schema-only'),
             $exit_code
         );
         if (0 !== $exit_code) {
