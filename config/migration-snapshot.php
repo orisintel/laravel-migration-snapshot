@@ -55,5 +55,5 @@ return [
     | records with special IDs which must match another environment.
     |
     */
-    'trim-underscores' => env('MIGRATION_SNAPSHOT_INCLUDE_DATA', false),
+    'include-data' => env('MIGRATION_SNAPSHOT_INCLUDE_DATA', false),
 ];
