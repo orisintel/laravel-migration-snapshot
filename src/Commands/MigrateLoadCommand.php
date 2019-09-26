@@ -2,9 +2,12 @@
 
 namespace OrisIntel\MigrationSnapshot\Commands;
 
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Symfony\Component\Console\Output\OutputInterface;
 
-final class MigrateLoadCommand extends \Illuminate\Console\Command
+final class MigrateLoadCommand extends Command
 {
     protected $signature = 'migrate:load
         {--database= : The database connection to use}
@@ -27,17 +30,17 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
 
         $path = database_path() . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX;
         if (! file_exists($path)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Schema-migrations path not found, run `migrate:dump` first.'
             );
         }
 
-        $database = $this->option('database') ?: \DB::getDefaultConnection();
-        \DB::setDefaultConnection($database);
-        $db_config = \DB::getConfig();
+        $database = $this->option('database') ?: DB::getDefaultConnection();
+        DB::setDefaultConnection($database);
+        $db_config = DB::getConfig();
 
         if (! in_array($db_config['driver'], MigrateDumpCommand::SUPPORTED_DB_DRIVERS, true)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Unsupported DB driver ' . var_export($db_config['driver'], 1)
             );
         }
@@ -47,6 +50,7 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
             ? true
             // Prefixing with command name since `migrate` may implicitly call.
             : env('MIGRATE_LOAD_NO_DROP') ? true : false);
+
         if ($is_dropping) {
             \Schema::dropAllViews();
             \Schema::dropAllTables();
@@ -66,6 +70,19 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
         }
 
         $this->info('Loaded schema');
+
+        $data_path = database_path() . MigrateDumpCommand::DATA_SQL_PATH_SUFFIX;
+        if (file_exists($data_path)) {
+            $this->info('Loading default data...');
+
+            $exit_code = self::{$method}($data_path, $db_config, $this->getOutput()->getVerbosity());
+
+            if (0 !== $exit_code) {
+                exit($exit_code); // CONSIDER: Returning instead.
+            }
+
+            $this->info('Loaded default data successfully!');
+        }
     }
 
     private static function mysqlLoad(string $path, array $db_config, int $verbosity = null) : int
@@ -86,21 +103,21 @@ final class MigrateLoadCommand extends \Illuminate\Console\Command
             . ' --password=' . escapeshellarg($db_config['password'])
             . ' --database=' . escapeshellarg($db_config['database']);
         switch($verbosity) {
-        case OutputInterface::VERBOSITY_QUIET:
-            $command .= ' -q';
-            break;
-        case OutputInterface::VERBOSITY_NORMAL:
-            // No op.
-            break;
-        case OutputInterface::VERBOSITY_VERBOSE:
-            $command .= ' -v';
-            break;
-        case OutputInterface::VERBOSITY_VERY_VERBOSE:
-            $command .= ' -v -v';
-            break;
-        case OutputInterface::VERBOSITY_DEBUG:
-            $command .= ' -v -v -v';
-            break;
+            case OutputInterface::VERBOSITY_QUIET:
+                $command .= ' -q';
+                break;
+            case OutputInterface::VERBOSITY_NORMAL:
+                // No op.
+                break;
+            case OutputInterface::VERBOSITY_VERBOSE:
+                $command .= ' -v';
+                break;
+            case OutputInterface::VERBOSITY_VERY_VERBOSE:
+                $command .= ' -v -v';
+                break;
+            case OutputInterface::VERBOSITY_DEBUG:
+                $command .= ' -v -v -v';
+                break;
         }
 
         passthru($command, $exit_code);
