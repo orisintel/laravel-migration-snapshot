@@ -55,5 +55,5 @@ return [
     | records with special IDs which must match another environment.
     |
     */
-    'include-data' => env('MIGRATION_SNAPSHOT_INCLUDE_DATA', false),
+    'data' => env('MIGRATION_SNAPSHOT_DATA', false),
 ];
