@@ -228,7 +228,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
         passthru(
             $command_prefix
             . ' --file=' . escapeshellarg($schema_sql_path)
-            . ' --schema-only',
+            . (config('migration-snapshot.data') ? :'' : ' --schema-only'),
             $exit_code
         );
         if (0 !== $exit_code) {
@@ -302,7 +302,7 @@ final class MigrateDumpCommand extends \Illuminate\Console\Command
                 return $exit_code;
             }
 
-            if ('migrations' === $table) {
+            if (config('migration-snapshot.data') || 'migrations' === $table) {
                 $insert_rows = array_slice($output, 4, -1);
                 $sorted = self::reorderMigrationRows($insert_rows);
                 array_splice($output, 4, -1, $sorted);
