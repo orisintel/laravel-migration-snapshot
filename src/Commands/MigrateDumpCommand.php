@@ -84,6 +84,11 @@ final class MigrateDumpCommand extends Command
         $this->info('Finished Data Dump');
     }
 
+    /**
+     * @param array $output
+     *
+     * @return array
+     */
     public static function reorderMigrationRows(array $output) : array
     {
         if (config('migration-snapshot.reorder')) {
@@ -423,6 +428,12 @@ final class MigrateDumpCommand extends Command
         return $exit_code;
     }
 
+    /**
+     * @param array $db_config
+     * @param string $schema_sql_path
+     *
+     * @return int
+     */
     private static function sqliteDataDump(array $db_config, string $schema_sql_path) : int
     {
         // CONSIDER: Accepting command name as option or from config.

@@ -85,6 +85,13 @@ final class MigrateLoadCommand extends Command
         }
     }
 
+    /**
+     * @param string $path
+     * @param array $db_config
+     * @param int|null $verbosity
+     *
+     * @return int
+     */
     private static function mysqlLoad(string $path, array $db_config, int $verbosity = null) : int
     {
         // CONSIDER: Supporting unix_socket.
@@ -125,6 +132,13 @@ final class MigrateLoadCommand extends Command
         return $exit_code;
     }
 
+    /**
+     * @param string $path
+     * @param array $db_config
+     * @param int|null $verbosity
+     *
+     * @return int
+     */
     private static function pgsqlLoad(string $path, array $db_config, int $verbosity = null) : int
     {
         // CONSIDER: Supporting unix_socket.
@@ -163,6 +177,13 @@ final class MigrateLoadCommand extends Command
         return $exit_code;
     }
 
+    /**
+     * @param string $path
+     * @param array $db_config
+     * @param int|null $verbosity
+     *
+     * @return int
+     */
     private static function sqliteLoad(string $path, array $db_config, int $verbosity = null) : int
     {
         // CONSIDER: Directly sending queries via Eloquent (requires parsing SQL
