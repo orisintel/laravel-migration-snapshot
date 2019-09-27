@@ -44,4 +44,16 @@ return [
     |
     */
     'trim-underscores' => env('MIGRATION_SNAPSHOT_TRIM_UNDERSCORES', true),
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Include Data
+    |--------------------------------------------------------------------------
+    |
+    | Include existing table data in the database dump. Useful for when you
+    | have constant defined values like a system user with a specific ID or
+    | records with special IDs which must match another environment.
+    |
+    */
+    'data' => env('MIGRATION_SNAPSHOT_DATA', false),
 ];
