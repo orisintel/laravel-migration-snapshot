@@ -81,7 +81,7 @@ final class MigrateDumpCommand extends Command
             exit($exit_code);
         }
 
-        $this->info('Finished Data Dump');
+        $this->info('Dumped Data');
     }
 
     /**
