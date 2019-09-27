@@ -430,11 +430,11 @@ final class MigrateDumpCommand extends Command
 
     /**
      * @param array $db_config
-     * @param string $schema_sql_path
+     * @param string $data_sql_path
      *
      * @return int
      */
-    private static function sqliteDataDump(array $db_config, string $schema_sql_path) : int
+    private static function sqliteDataDump(array $db_config, string $data_sql_path) : int
     {
         // CONSIDER: Accepting command name as option or from config.
         $command_prefix = 'sqlite3 ' . escapeshellarg($db_config['database']);
@@ -451,8 +451,13 @@ final class MigrateDumpCommand extends Command
         $tables = preg_split('/\s+/', implode(' ', $output));
 
         foreach ($tables as $table) {
+            // We don't want to dump the migrations table here
+            if ('migrations' === $table) {
+                continue;
+            }
+
             // Only migrations should dump data with schema.
-            $sql_command = 'migrations' !== $table ? '.dump' : '.schema';
+            $sql_command = '.dump';
 
             $output = [];
             exec(
@@ -465,14 +470,8 @@ final class MigrateDumpCommand extends Command
                 return $exit_code;
             }
 
-            if ('migrations' !== $table) {
-                $insert_rows = array_slice($output, 4, -1);
-                $sorted = self::reorderMigrationRows($insert_rows);
-                array_splice($output, 4, -1, $sorted);
-            }
-
             file_put_contents(
-                $schema_sql_path,
+                $data_sql_path,
                 implode(PHP_EOL, $output) . PHP_EOL,
                 FILE_APPEND
             );
