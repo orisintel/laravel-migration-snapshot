@@ -330,11 +330,18 @@ final class MigrateDumpCommand extends Command
         return $exit_code;
     }
 
+    /**
+     * @param array $db_config
+     * @param string $data_sql_path
+     *
+     * @return int
+     */
     private static function pgsqlDataDump(array $db_config, string $data_sql_path) : int
     {
         passthru(
             static::pgsqlCommandPrefix($db_config)
             . ' --file=' . escapeshellarg($data_sql_path)
+            . ' --exclude-table=' . escapeshellarg($db_config['database'] . '.migrations')
             . ' --data-only',
             $exit_code
         );
