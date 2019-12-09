@@ -187,11 +187,16 @@ final class MigrateDumpCommand extends Command
      */
     private static function mysqlDataDump(array $db_config, string $data_sql_path) : int
     {
-        passthru(
-            static::mysqlCommandPrefix($db_config)
+        $command = static::mysqlCommandPrefix($db_config)
             . ' --result-file=' . escapeshellarg($data_sql_path)
-            . ' --no-create-info --skip-triggers'
-            . ' --ignore-table=' . escapeshellarg($db_config['database'] . '.migrations'),
+            . ' --no-create-info --skip-comments --skip-triggers'
+            . ' --ignore-table=' . escapeshellarg($db_config['database'] . '.migrations');
+        foreach (static::dataExcluded() as $table) {
+            $command .= ' --ignore-table=' . escapeshellarg($db_config['database'] . '.' . $table);
+        }
+
+        passthru(
+            $command,
             $exit_code
         );
 
@@ -343,11 +348,15 @@ final class MigrateDumpCommand extends Command
      */
     private static function pgsqlDataDump(array $db_config, string $data_sql_path) : int
     {
-        passthru(
-            static::pgsqlCommandPrefix($db_config)
+        $command = static::pgsqlCommandPrefix($db_config)
             . ' --file=' . escapeshellarg($data_sql_path)
             . ' --exclude-table=' . escapeshellarg($db_config['database'] . '.migrations')
-            . ' --data-only',
+            . ' --data-only';
+        foreach (static::dataExcluded() as $table) {
+            $command .= ' --exclude-table=' . escapeshellarg($db_config['database'] . '.' . $table);
+        }
+        passthru(
+            $command,
             $exit_code
         );
 
@@ -452,7 +461,10 @@ final class MigrateDumpCommand extends Command
 
         foreach ($tables as $table) {
             // We don't want to dump the migrations table here
-            if ('migrations' === $table) {
+            if (
+                'migrations' === $table
+                || in_array($table, static::dataExcluded(), true)
+            ) {
                 continue;
             }
 
@@ -478,5 +490,18 @@ final class MigrateDumpCommand extends Command
         }
 
         return $exit_code;
+    }
+
+    private static function dataExcluded() : array
+    {
+        $data_excluded = config('migration-snapshot.data-excluded');
+        if (is_iterable($data_excluded)) {
+            return $data_excluded;
+        }
+        return array_filter(
+            explode(',',
+                $data_excluded
+            )
+        );
     }
 }

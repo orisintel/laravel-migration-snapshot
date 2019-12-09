@@ -44,7 +44,7 @@ return [
     |
     */
     'trim-underscores' => env('MIGRATION_SNAPSHOT_TRIM_UNDERSCORES', true),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Include Data
@@ -56,4 +56,15 @@ return [
     |
     */
     'data' => env('MIGRATION_SNAPSHOT_DATA', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Data Excluded
+    |--------------------------------------------------------------------------
+    |
+    | Comma separated table names to exclude when dumping with data. (The
+    | "migrations" table will always be excluded regardless.)
+    |
+    */
+    'data-excluded' => env('MIGRATION_SNAPSHOT_DATA_EXCLUDED', ''),
 ];
