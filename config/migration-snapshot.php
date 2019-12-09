@@ -44,7 +44,7 @@ return [
     |
     */
     'trim-underscores' => env('MIGRATION_SNAPSHOT_TRIM_UNDERSCORES', true),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Include Data
@@ -56,4 +56,18 @@ return [
     |
     */
     'data' => env('MIGRATION_SNAPSHOT_DATA', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | After Dump
+    |--------------------------------------------------------------------------
+    |
+    | Run this closure after dumping snapshot. Helps when output may vary by
+    | environment in unimportant ways which would just pollute the SCM history
+    | with noisy changes.
+    |
+    | Must accept two arguments: `function ($schema_sql_path, $data_sql_path)`.
+    |
+    */
+    'after-dump' => null,
 ];

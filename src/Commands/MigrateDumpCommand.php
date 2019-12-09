@@ -62,26 +62,31 @@ final class MigrateDumpCommand extends Command
 
         $this->info('Dumped schema');
 
-        if (! $this->option('include-data')) {
-            return;
-        }
+        $data_sql_path = null;
+        if ($this->option('include-data')) {
+            $this->info('Starting Data Dump');
 
-        $this->info('Starting Data Dump');
+            $data_sql_path = database_path() . self::DATA_SQL_PATH_SUFFIX;
 
-        $data_sql_path = database_path() . self::DATA_SQL_PATH_SUFFIX;
+            $method = $db_config['driver'] . 'DataDump';
+            $exit_code = self::{$method}($db_config, $data_sql_path);
 
-        $method = $db_config['driver'] . 'DataDump';
-        $exit_code = self::{$method}($db_config, $data_sql_path);
+            if (0 !== $exit_code) {
+                if (file_exists($data_sql_path)) {
+                    unlink($data_sql_path);
+                }
 
-        if (0 !== $exit_code) {
-            if (file_exists($data_sql_path)) {
-                unlink($data_sql_path);
+                exit($exit_code);
             }
-
-            exit($exit_code);
         }
 
         $this->info('Dumped Data');
+
+        $after_dump = config('migration-snapshot.after-dump');
+        if ($after_dump) {
+            $after_dump($schema_sql_path, $data_sql_path);
+            $this->info('Ran After-dump');
+        }
     }
 
     /**
