@@ -17,7 +17,7 @@ class MigrateDumpTest extends TestCase
                         '~^/\*.*\*/;?[\r\n]+~mu', // Remove /**/ comments.
                         '',
                         file_get_contents($schema_sql_path)
-                    ),
+                    )
                 );
             }
         );
