@@ -200,7 +200,7 @@ final class MigrateDumpCommand extends Command
         passthru(
             static::mysqlCommandPrefix($db_config)
             . ' --result-file=' . escapeshellarg($data_sql_path)
-            . ' --no-create-info --skip-triggers'
+            . ' --no-create-info --skip-routines --skip-triggers'
             . ' --ignore-table=' . escapeshellarg($db_config['database'] . '.migrations'),
             $exit_code
         );
