@@ -162,7 +162,12 @@ final class MigrateDumpCommand extends Command
 
         // Include migration rows to avoid unnecessary reruns conflicting.
         exec(
-            static::mysqlCommandPrefix($db_config) . ' migrations --no-create-info --skip-extended-insert --compact',
+            static::mysqlCommandPrefix($db_config)
+                . ' migrations'
+                . ' --no-create-info'
+                . ' --skip-extended-insert'
+                . ' --skip-routines'
+                . ' --compact',
             $output,
             $exit_code
         );
