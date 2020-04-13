@@ -17,9 +17,9 @@ class MigrateDumpTest extends TestCase
         $this->assertDirectoryExists($this->schemaSqlDirectory);
         $this->assertFileExists($this->schemaSqlPath);
         $result_sql = file_get_contents($this->schemaSqlPath);
-        $this->assertRegExp('/CREATE TABLE (public\.)?test_ms /', $result_sql);
-        $this->assertRegExp('/INSERT INTO (public\.)?migrations /', $result_sql);
+        $this->assertMatchesRegularExpression('/CREATE TABLE (public\.)?test_ms /', $result_sql);
+        $this->assertMatchesRegularExpression('/INSERT INTO (public\.)?migrations /', $result_sql);
         $last_character = mb_substr($result_sql, -1);
-        $this->assertRegExp("/[\r\n]\z/mu", $last_character);
+        $this->assertMatchesRegularExpression("/[\r\n]\z/mu", $last_character);
     }
 }

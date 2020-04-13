@@ -20,7 +20,7 @@ class MigrateDumpTest extends TestCase
         $this->assertContains('INSERT INTO `migrations`', $result_sql);
         $this->assertNotContains(' AUTO_INCREMENT=', $result_sql);
         $last_character = mb_substr($result_sql, -1);
-        $this->assertRegExp("/[\r\n]\z/mu", $last_character);
+        $this->assertMatchesRegularExpression("/[\r\n]\z/mu", $last_character);
     }
 
     public function test_trimUnderscoresFromForeign()
