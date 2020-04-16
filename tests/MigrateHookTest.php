@@ -61,7 +61,7 @@ class MigrateHookTest extends TestCase
         $this->assertEquals(0, $result);
 
         $output_string = $output->fetch();
-        $this->assertNotContains('Loaded schema', $output_string);
+        $this->assertStringNotContainsString('Loaded schema', $output_string);
 
         $this->assertEquals(1, \DB::table('test_ms')->count());
     }

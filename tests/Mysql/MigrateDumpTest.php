@@ -18,7 +18,7 @@ class MigrateDumpTest extends TestCase
         $result_sql = file_get_contents($this->schemaSqlPath);
         $this->assertStringContainsString('CREATE TABLE `test_ms`', $result_sql);
         $this->assertStringContainsString('INSERT INTO `migrations`', $result_sql);
-        $this->assertNotContains(' AUTO_INCREMENT=', $result_sql);
+        $this->assertStringNotContainsString(' AUTO_INCREMENT=', $result_sql);
         $last_character = mb_substr($result_sql, -1);
         $this->assertMatchesRegularExpression("/[\r\n]\z/mu", $last_character);
     }
