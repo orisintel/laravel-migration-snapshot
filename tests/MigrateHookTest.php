@@ -24,8 +24,8 @@ class MigrateHookTest extends TestCase
         $this->assertEquals(0, $result);
 
         $output_string = $output->fetch();
-        $this->assertContains('Loaded schema', $output_string);
-        $this->assertContains('Dumped schema', $output_string);
+        $this->assertStringContainsString('Loaded schema', $output_string);
+        $this->assertStringContainsString('Dumped schema', $output_string);
     }
 
     public function test_handle_dumpsOnRollback()
@@ -44,7 +44,7 @@ class MigrateHookTest extends TestCase
         $this->assertEquals(0, $result);
 
         $output_string = $output->fetch();
-        $this->assertContains('Dumped schema', $output_string);
+        $this->assertStringContainsString('Dumped schema', $output_string);
     }
 
     public function test_handle_doesNotLoadWhenDbHasMigrated()
@@ -61,7 +61,7 @@ class MigrateHookTest extends TestCase
         $this->assertEquals(0, $result);
 
         $output_string = $output->fetch();
-        $this->assertNotContains('Loaded schema', $output_string);
+        $this->assertStringNotContainsString('Loaded schema', $output_string);
 
         $this->assertEquals(1, \DB::table('test_ms')->count());
     }

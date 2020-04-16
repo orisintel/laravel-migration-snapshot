@@ -33,6 +33,6 @@ class MigrateDumpTest extends TestCase
         $schema_sql = file_get_contents(
             database_path() . MigrateDumpCommand::SCHEMA_SQL_PATH_SUFFIX
         );
-        $this->assertNotContains('/*', $schema_sql);
+        $this->assertStringNotContainsString('/*', $schema_sql);
     }
 }
