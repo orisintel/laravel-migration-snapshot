@@ -7,7 +7,7 @@ php:
 
 env:
     matrix:
-    #- COMPOSER_FLAGS="--prefer-lowest" # Disabled until works w/7.4 (2019-12-04)
+    - COMPOSER_FLAGS="--prefer-lowest"
     - COMPOSER_FLAGS=""
 
 services:
@@ -24,7 +24,7 @@ before_script:
 - psql -c 'CREATE ROLE root SUPERUSER LOGIN;' -U postgres
 
 script:
-- vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover --configuration phpunit.xml.travis
+- vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover --configuration phpunit.xml.travis --testdox
 
 after_script:
 - php vendor/bin/ocular code-coverage:upload --format=php-clover coverage.clover
