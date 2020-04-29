@@ -49,7 +49,7 @@ final class MigrateLoadCommand extends Command
         $is_dropping = ! ($this->option('no-drop')
             ? true
             // Prefixing with command name since `migrate` may implicitly call.
-            : (env('MIGRATE_LOAD_NO_DROP') ? true : false));
+            : ((env('MIGRATE_LOAD_NO_DROP') ? true : false)));
 
         if ($is_dropping) {
             \Schema::dropAllViews();
