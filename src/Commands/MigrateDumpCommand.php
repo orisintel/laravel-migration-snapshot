@@ -141,7 +141,8 @@ final class MigrateDumpCommand extends Command
         passthru(
             static::mysqlCommandPrefix($db_config)
             . ' --result-file=' . escapeshellarg($schema_sql_path)
-            . ' --no-data',
+            . ' --no-data'
+            . ' --routines',
             $exit_code
         );
 
@@ -167,6 +168,7 @@ final class MigrateDumpCommand extends Command
                 . ' --no-create-info'
                 . ' --skip-extended-insert'
                 . ' --skip-routines'
+                . ' --single-transaction'
                 . ' --compact',
             $output,
             $exit_code
@@ -201,7 +203,8 @@ final class MigrateDumpCommand extends Command
             static::mysqlCommandPrefix($db_config)
             . ' --result-file=' . escapeshellarg($data_sql_path)
             . ' --no-create-info --skip-routines --skip-triggers'
-            . ' --ignore-table=' . escapeshellarg($db_config['database'] . '.migrations'),
+            . ' --ignore-table=' . escapeshellarg($db_config['database'] . '.migrations')
+            . ' --single-transaction', // Avoid disruptive locks.
             $exit_code
         );
 
@@ -237,7 +240,7 @@ final class MigrateDumpCommand extends Command
         // Not including connection name in file since typically only one DB.
         // Excluding any hash or date suffix since only current is relevant.
 
-        return 'mysqldump --routines --skip-add-drop-table'
+        return 'mysqldump --skip-add-drop-table'
             . ' --skip-add-locks --skip-comments --skip-set-charset --tz-utc --set-gtid-purged=OFF'
             . ' --host=' . escapeshellarg($db_config['host'])
             . ' --port=' . escapeshellarg($db_config['port'])
