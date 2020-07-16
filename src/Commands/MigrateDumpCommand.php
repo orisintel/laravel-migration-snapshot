@@ -203,6 +203,7 @@ final class MigrateDumpCommand extends Command
             . ' --result-file=' . escapeshellarg($data_sql_path)
             . ' --no-create-info --skip-routines --skip-triggers'
             . ' --ignore-table=' . escapeshellarg($db_config['database'] . '.migrations')
+            . ' --single-transaction', // Avoid disruptive locks.
             $exit_code
         );
 
