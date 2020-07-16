@@ -168,6 +168,7 @@ final class MigrateDumpCommand extends Command
                 . ' --no-create-info'
                 . ' --skip-extended-insert'
                 . ' --skip-routines'
+                . ' --single-transaction'
                 . ' --compact',
             $output,
             $exit_code
